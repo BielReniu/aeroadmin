@@ -7,3 +7,8 @@
 
 ## 📂 Project Structure
 The project is organized into the following directories and files:
+
+## Versions
+| Version   | Description   |
+|-----------|---------------|
+| 1.0.0     | First Version |
