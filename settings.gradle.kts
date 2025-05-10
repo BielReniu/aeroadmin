@@ -12,3 +12,4 @@ plugins {
 
 rootProject.name = "aeroadmin"
 include("app", "list", "utilities", "model")
+include("repositori")
