@@ -1,0 +1,23 @@
+package cat.uvic.teknos.dam.aeroadmin.console.exceptions;
+
+public class BannerException extends RuntimeException {
+    public BannerException() {
+        super();
+    }
+
+    public BannerException(String message) {
+        super(message);
+    }
+
+    public BannerException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BannerException(Throwable cause) {
+        super(cause);
+    }
+
+    public BannerException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+}
