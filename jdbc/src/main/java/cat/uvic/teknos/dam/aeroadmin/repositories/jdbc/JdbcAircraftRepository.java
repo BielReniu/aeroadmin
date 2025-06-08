@@ -3,9 +3,9 @@ package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftImpl;
+import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
 
 import java.sql.*;
 import java.util.HashSet;

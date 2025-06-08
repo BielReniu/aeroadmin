@@ -4,9 +4,9 @@ import cat.uvic.teknos.dam.aeroadmin.model.enums.AssignmentRole;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Flight;
 import cat.uvic.teknos.dam.aeroadmin.model.model.PilotAssignment;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.PilotAssignmentImpl;
+import cat.uvic.teknos.dam.aeroadmin.repositories.PilotAssignmentRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.PilotAssignmentRepository;
 
 import java.sql.*;
 import java.util.HashSet;

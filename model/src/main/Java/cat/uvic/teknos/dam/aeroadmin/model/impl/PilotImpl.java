@@ -84,4 +84,34 @@ public class PilotImpl implements Pilot {
     public void setLicense(PilotLicense license) {
         this.license = license;
     }
+
+    @Override
+    public String getName() {
+        return "";
+    }
+
+    @Override
+    public void setName(String name) {
+
+    }
+
+    @Override
+    public void setSurname(String surname) {
+
+    }
+
+    @Override
+    public void setLicenseNumber(String licenseNumber) {
+
+    }
+
+    @Override
+    public void setRole(String role) {
+
+    }
+
+    @Override
+    public void setExperienceYears(int experienceYears) {
+
+    }
 }

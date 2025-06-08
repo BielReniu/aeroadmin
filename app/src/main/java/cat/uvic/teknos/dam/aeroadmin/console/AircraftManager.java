@@ -7,8 +7,10 @@ import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Set;
 
 public class AircraftManager {
     private final ModelFactory modelFactory;
@@ -28,7 +30,11 @@ public class AircraftManager {
         System.out.println("3 - to save a new aircraft");
         System.out.println("Type 'exit' to go back");
 
-        var repository = repositoryFactory.createAircraftRepository();
+        var repository = repositoryFactory.getAircraftRepository(); // Canviat a get...()
+        if (repository == null) {
+            System.err.println("Error: AircraftRepository is null!");
+            return;
+        }
 
         String command;
         while (!Objects.equals(command = scanner.nextLine(), "exit")) {
@@ -48,7 +54,7 @@ public class AircraftManager {
                     int id = Integer.parseInt(scanner.nextLine());
                     var aircraft = repository.get(id);
                     if (aircraft != null) {
-                        System.out.println(AsciiTable.getTable(Arrays.asList(aircraft), Arrays.asList(
+                        System.out.println(AsciiTable.getTable(Set.of(aircraft), Arrays.asList(
                                 new Column().with(a -> Integer.toString(a.getAircraftId())),
                                 new Column().header("Model").with(Aircraft::getModel),
                                 new Column().header("Manufacturer").with(Aircraft::getManufacturer),
@@ -61,8 +67,9 @@ public class AircraftManager {
                     break;
 
                 case "3":
+                    Aircraft aircraftToSave = modelFactory.createAircraft();
+
                     System.out.println("Description (model): ");
-                    var aircraftToSave = modelFactory.createAircraft();
                     aircraftToSave.setModel(scanner.nextLine());
 
                     System.out.println("Manufacturer: ");

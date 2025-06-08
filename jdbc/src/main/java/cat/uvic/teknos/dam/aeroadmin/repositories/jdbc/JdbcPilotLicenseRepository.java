@@ -3,9 +3,9 @@ package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 import cat.uvic.teknos.dam.aeroadmin.model.enums.LicenseType;
 import cat.uvic.teknos.dam.aeroadmin.model.model.PilotLicense;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.PilotLicenseImpl;
+import cat.uvic.teknos.dam.aeroadmin.repositories.PilotLicenseRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.PilotLicenseRepository;
 
 import java.sql.*;
 import java.util.HashSet;

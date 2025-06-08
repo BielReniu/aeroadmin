@@ -18,5 +18,5 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.app.App"
+    mainClass = "cat.uvic.teknos.dam.aeroadmin.console.App"
 }

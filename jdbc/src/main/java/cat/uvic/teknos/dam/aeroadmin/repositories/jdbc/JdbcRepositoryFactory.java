@@ -1,7 +1,6 @@
 package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 
 import cat.uvic.teknos.dam.aeroadmin.repositories.*;
-import cat.uvic.teknos.dam.aeroadmin.repositories.RepositoryFactory;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 
@@ -14,13 +13,13 @@ public class JdbcRepositoryFactory implements RepositoryFactory {
     }
 
     @Override
-    public AircraftDetailRepository getAircraftDetailRepository() {
-        return new JdbcAircraftDetailRepository(dataSource);
+    public AircraftRepository getAircraftRepository() {
+        return new JdbcAircraftRepository(dataSource);
     }
 
     @Override
-    public AircraftRepository getAircraftRepository() {
-        return new JdbcAircraftRepository(dataSource);
+    public AircraftDetailRepository getAircraftDetailRepository() {
+        return new JdbcAircraftDetailRepository(dataSource);
     }
 
     @Override
@@ -48,38 +47,39 @@ public class JdbcRepositoryFactory implements RepositoryFactory {
         return new JdbcPilotRepository(dataSource);
     }
 
+    // Si no vols eliminar-los, pots implementar els mètodes createXxx():
     @Override
     public AircraftRepository createAircraftRepository() {
-        return null;
+        return new JdbcAircraftRepository(dataSource);
     }
 
     @Override
     public AircraftDetailRepository createAircraftDetailRepository() {
-        return null;
+        return new JdbcAircraftDetailRepository(dataSource);
     }
 
     @Override
     public AirlineRepository createAirlineRepository() {
-        return null;
+        return new JdbcAirlineRepository(dataSource);
     }
 
     @Override
     public PilotRepository createPilotRepository() {
-        return null;
+        return new JdbcPilotRepository(dataSource);
     }
 
     @Override
     public PilotLicenseRepository createPilotLicenseRepository() {
-        return null;
+        return new JdbcPilotLicenseRepository(dataSource);
     }
 
     @Override
     public PilotAssignmentRepository createPilotAssignmentRepository() {
-        return null;
+        return new JdbcPilotAssignmentRepository(dataSource);
     }
 
     @Override
     public FlightRepository createFlightRepository() {
-        return null;
+        return new JdbcFlightRepository(dataSource);
     }
 }

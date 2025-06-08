@@ -30,4 +30,16 @@ public interface Pilot {
     PilotLicense getLicense();
 
     void setLicense(PilotLicense license);
+
+    String getName();
+
+    void setName(String name);
+
+    void setSurname(String surname);
+
+    void setLicenseNumber(String licenseNumber);
+
+    void setRole(String role);
+
+    void setExperienceYears(int experienceYears);
 }

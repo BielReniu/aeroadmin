@@ -28,4 +28,6 @@ public interface Airline {
     String getWebsite();
 
     void setWebsite(String website);
+
+    void setCode(String ib);
 }
