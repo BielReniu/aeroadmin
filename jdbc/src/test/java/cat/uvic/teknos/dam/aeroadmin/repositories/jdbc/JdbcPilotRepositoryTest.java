@@ -3,6 +3,7 @@ package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 import cat.uvic.teknos.dam.aeroadmin.model.model.*;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.*;
 import cat.uvic.teknos.dam.aeroadmin.repositories.PilotRepository;
+import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 import org.junit.jupiter.api.*;
 
@@ -36,7 +37,7 @@ class JdbcPilotRepositoryTest {
     @BeforeEach
     void setUp() throws SQLException {
         createTables();
-        repository = new JdbcPilotRepository(new SingleConnectionDataSource());
+        repository = new JdbcPilotRepository((DataSource) new SingleConnectionDataSource());
     }
 
     @AfterEach
@@ -152,7 +153,7 @@ class JdbcPilotRepositoryTest {
         airline.setCountry(country);
         airline.setFoundationYear(foundationYear);
         airline.setWebsite(website);
-        new JdbcAirlineRepository(new SingleConnectionDataSource()).save(airline);
+        new JdbcAirlineRepository((DataSource) new SingleConnectionDataSource()).save(airline);
         return airline;
     }
 

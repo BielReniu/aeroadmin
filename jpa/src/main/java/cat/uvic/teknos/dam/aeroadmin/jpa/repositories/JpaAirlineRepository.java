@@ -1,8 +1,8 @@
-package cat.uvic.teknos.dam.aeroadmin.repositories.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.repositories;
 
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraft;
-import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
-import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAirline;
+import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
+import cat.uvic.teknos.dam.aeroadmin.repositories.AirlineRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -12,37 +12,36 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashSet;
 import java.util.Set;
 
-public class JpaAircraftRepository implements AircraftRepository {
+public class JpaAirlineRepository implements AirlineRepository {
 
     private final EntityManagerFactory entityManagerFactory;
 
-    public JpaAircraftRepository(EntityManagerFactory entityManagerFactory) {
+    public JpaAirlineRepository(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
     }
 
     @Override
-    public void save(Aircraft aircraft) {
+    public void save(Airline airline) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            if (aircraft.getAircraftId() == 0) {
-                em.persist(aircraft);
-            } else {
-                em.merge(aircraft);
-            }
+            if (((JpaAirline) airline).getAirlineId() == 0)
+                em.persist(airline);
+            else
+                em.merge(airline);
 
             tx.commit();
         }
     }
 
     @Override
-    public void delete(Aircraft aircraft) {
+    public void delete(Airline airline) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            Aircraft toDelete = em.find(JpaAircraft.class, aircraft.getAircraftId());
+            Airline toDelete = em.find(JpaAirline.class, ((JpaAirline) airline).getAirlineId());
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -51,22 +50,32 @@ public class JpaAircraftRepository implements AircraftRepository {
     }
 
     @Override
-    public Aircraft get(Integer id) {
+    public Airline get(Integer id) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            return em.find(JpaAircraft.class, id);
+            return em.find(JpaAirline.class, id);
         }
     }
 
     @Override
-    public Set<Aircraft> getAll() {
+    public Set<Airline> getAll() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            TypedQuery<JpaAircraft> query = em.createQuery("SELECT a FROM JpaAircraft a", JpaAircraft.class);
+            TypedQuery<JpaAirline> query = em.createQuery("SELECT a FROM JpaAirline a", JpaAirline.class);
             return new HashSet<>(query.getResultList());
         }
     }
 
     @Override
-    public Set<Aircraft> getByManufacturer(String manufacturer) {
+    public Airline get(int id) {
+        return null;
+    }
+
+    @Override
+    public Set<Airline> getByCountry(String country) {
         return Set.of();
+    }
+
+    @Override
+    public Airline create() {
+        return null;
     }
 }

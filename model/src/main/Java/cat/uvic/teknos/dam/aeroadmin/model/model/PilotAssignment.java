@@ -3,6 +3,7 @@ package cat.uvic.teknos.dam.aeroadmin.model.model;
 import cat.uvic.teknos.dam.aeroadmin.model.enums.AssignmentRole;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public interface PilotAssignment {
     int getAssignmentId();
@@ -28,4 +29,6 @@ public interface PilotAssignment {
     BigDecimal getAssignedHours();
 
     void setAssignedHours(BigDecimal assignedHours);
+
+    void setAssignedAt(LocalDateTime assignedAt);
 }

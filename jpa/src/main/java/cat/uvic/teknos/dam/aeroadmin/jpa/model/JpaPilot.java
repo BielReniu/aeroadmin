@@ -1,4 +1,4 @@
-package cat.uvic.teknos.dam.aeroadmin.model.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.model;
 
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Pilot;

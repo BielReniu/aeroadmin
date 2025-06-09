@@ -18,7 +18,12 @@ public class JdbcFlightRepository implements FlightRepository {
     private final DataSource dataSource;
 
     public JdbcFlightRepository(DataSource dataSource) {
-        this.dataSource = new SingleConnectionDataSource();
+        this.dataSource = new DataSource() {
+            @Override
+            public Connection getConnection() {
+                return null;
+            }
+        };
     }
 
     @Override
@@ -142,5 +147,10 @@ public class JdbcFlightRepository implements FlightRepository {
     @Override
     public Set<Flight> getByDepartureAirport(String departureAirport) {
         return Set.of();
+    }
+
+    @Override
+    public Flight create() {
+        return null;
     }
 }

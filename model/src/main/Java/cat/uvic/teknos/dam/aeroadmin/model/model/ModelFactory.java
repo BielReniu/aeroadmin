@@ -4,10 +4,15 @@ import cat.uvic.teknos.dam.aeroadmin.model.model.*;
 
 public interface ModelFactory {
     Aircraft createAircraft();
-    AircraftDetail createAircraftDetail();
-    Airline createAirline();
     Pilot createPilot();
+
+    AircraftDetail createAircraftDetail();
+
+    Airline createAirline();
+
     PilotLicense createPilotLicense();
+
     PilotAssignment createPilotAssignment();
+
     Flight createFlight();
 }

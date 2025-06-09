@@ -8,4 +8,5 @@ plugins {
 
 dependencies {
     implementation("com.mysql:mysql-connector-j:9.3.0")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
 }

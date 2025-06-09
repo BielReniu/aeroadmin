@@ -7,4 +7,6 @@ import java.util.Set;
 
 public interface PilotLicenseRepository extends Repository<Integer, PilotLicense> {
     Set<PilotLicense> getByLicenseType(LicenseType licenseType);
+
+    PilotLicense create();
 }

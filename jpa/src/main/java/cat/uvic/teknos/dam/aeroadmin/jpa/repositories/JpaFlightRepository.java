@@ -1,8 +1,8 @@
-package cat.uvic.teknos.dam.aeroadmin.repositories.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.repositories;
 
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAirline;
-import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
-import cat.uvic.teknos.dam.aeroadmin.repositories.AirlineRepository;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaFlight;
+import cat.uvic.teknos.dam.aeroadmin.model.model.Flight;
+import cat.uvic.teknos.dam.aeroadmin.repositories.FlightRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -12,36 +12,36 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashSet;
 import java.util.Set;
 
-public class JpaAirlineRepository implements AirlineRepository {
+public class JpaFlightRepository implements FlightRepository {
 
     private final EntityManagerFactory entityManagerFactory;
 
-    public JpaAirlineRepository(EntityManagerFactory entityManagerFactory) {
+    public JpaFlightRepository(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
     }
 
     @Override
-    public void save(Airline airline) {
+    public void save(Flight flight) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            if (((JpaAirline) airline).getAirlineId() == 0)
-                em.persist(airline);
+            if (((JpaFlight) flight).getFlightId() == 0)
+                em.persist(flight);
             else
-                em.merge(airline);
+                em.merge(flight);
 
             tx.commit();
         }
     }
 
     @Override
-    public void delete(Airline airline) {
+    public void delete(Flight flight) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            Airline toDelete = em.find(JpaAirline.class, ((JpaAirline) airline).getAirlineId());
+            Flight toDelete = em.find(JpaFlight.class, ((JpaFlight) flight).getFlightId());
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -50,22 +50,27 @@ public class JpaAirlineRepository implements AirlineRepository {
     }
 
     @Override
-    public Airline get(Integer id) {
+    public Flight get(Integer id) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            return em.find(JpaAirline.class, id);
+            return em.find(JpaFlight.class, id);
         }
     }
 
     @Override
-    public Set<Airline> getAll() {
+    public Set<Flight> getAll() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            TypedQuery<JpaAirline> query = em.createQuery("SELECT a FROM JpaAirline a", JpaAirline.class);
+            TypedQuery<JpaFlight> query = em.createQuery("SELECT f FROM JpaFlight f", JpaFlight.class);
             return new HashSet<>(query.getResultList());
         }
     }
 
     @Override
-    public Set<Airline> getByCountry(String country) {
+    public Set<Flight> getByDepartureAirport(String departureAirport) {
         return Set.of();
+    }
+
+    @Override
+    public Flight create() {
+        return null;
     }
 }

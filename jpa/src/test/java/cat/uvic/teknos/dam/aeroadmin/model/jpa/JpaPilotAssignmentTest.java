@@ -1,7 +1,7 @@
 package cat.uvic.teknos.dam.aeroadmin.model.jpa;
 
 import cat.uvic.teknos.dam.aeroadmin.model.enums.AssignmentRole;
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotAssignment;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilotAssignment;
 import cat.uvic.teknos.dam.aeroadmin.model.model.PilotAssignment;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;

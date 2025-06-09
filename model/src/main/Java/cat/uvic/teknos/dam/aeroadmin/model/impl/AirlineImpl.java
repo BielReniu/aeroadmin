@@ -80,4 +80,9 @@ public class AirlineImpl implements Airline {
     public void setWebsite(String website) {
         this.website = website;
     }
+
+    @Override
+    public void setCode(String ib) {
+
+    }
 }

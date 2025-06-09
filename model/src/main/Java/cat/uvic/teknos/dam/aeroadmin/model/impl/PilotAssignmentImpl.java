@@ -6,6 +6,7 @@ import cat.uvic.teknos.dam.aeroadmin.model.model.Pilot;
 import cat.uvic.teknos.dam.aeroadmin.model.model.PilotAssignment;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class PilotAssignmentImpl implements PilotAssignment {
     private int assignmentId;
@@ -73,5 +74,10 @@ public class PilotAssignmentImpl implements PilotAssignment {
     @Override
     public void setAssignedHours(BigDecimal assignedHours) {
         this.assignedHours = assignedHours;
+    }
+
+    @Override
+    public void setAssignedAt(LocalDateTime parse) {
+
     }
 }

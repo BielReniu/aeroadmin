@@ -6,4 +6,6 @@ import java.util.Set;
 
 public interface AircraftDetailRepository extends Repository<Integer, AircraftDetail> {
     Set<AircraftDetail> getByPassengerCapacity(int minCapacity, int maxCapacity);
+
+    AircraftDetail create();
 }

@@ -6,6 +6,7 @@ import cat.uvic.teknos.dam.aeroadmin.model.impl.FlightImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftImpl;
 import cat.uvic.teknos.dam.aeroadmin.repositories.FlightRepository;
+import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 import org.junit.jupiter.api.*;
 
@@ -39,7 +40,7 @@ class JdbcFlightRepositoryTest {
     @BeforeEach
     void setUp() throws SQLException {
         createTables();
-        repository = new JdbcFlightRepository(new SingleConnectionDataSource());
+        repository = new JdbcFlightRepository((DataSource) new SingleConnectionDataSource());
     }
 
     @AfterEach
@@ -178,7 +179,7 @@ class JdbcFlightRepositoryTest {
         airline.setCountry(country);
         airline.setFoundationYear(foundationYear);
         airline.setWebsite(website);
-        new JdbcAirlineRepository(new SingleConnectionDataSource()).save(airline);
+        new JdbcAirlineRepository((DataSource) new SingleConnectionDataSource()).save(airline);
         return airline;
     }
 
@@ -189,7 +190,7 @@ class JdbcFlightRepositoryTest {
         aircraft.setRegistrationNumber(registrationNumber);
         aircraft.setProductionYear(productionYear);
         aircraft.setAirline(airline);
-        new JdbcAircraftRepository(new SingleConnectionDataSource()).save(aircraft);
+        new JdbcAircraftRepository((DataSource) new SingleConnectionDataSource()).save(aircraft);
         return aircraft;
     }
 

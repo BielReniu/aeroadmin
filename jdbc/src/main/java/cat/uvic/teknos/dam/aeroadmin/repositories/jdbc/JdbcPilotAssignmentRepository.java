@@ -17,7 +17,12 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
     private final DataSource dataSource;
 
     public JdbcPilotAssignmentRepository(DataSource dataSource) {
-        this.dataSource = new SingleConnectionDataSource();
+        this.dataSource = new DataSource() {
+            @Override
+            public Connection getConnection() {
+                return null;
+            }
+        };
     }
 
     @Override
@@ -128,5 +133,10 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
     @Override
     public Set<PilotAssignment> getByFlight(Flight flight) {
         return Set.of();
+    }
+
+    @Override
+    public PilotAssignment create() {
+        return null;
     }
 }

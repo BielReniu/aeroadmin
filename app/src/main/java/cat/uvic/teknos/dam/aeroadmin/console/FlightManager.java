@@ -1,110 +1,77 @@
+// src/main/java/cat/uvic/teknos/dam/aeroadmin/console/FlightManager.java
 package cat.uvic.teknos.dam.aeroadmin.console;
 
+import cat.uvic.teknos.dam.aeroadmin.model.model.Flight;
+import cat.uvic.teknos.dam.aeroadmin.repositories.FlightRepository;
 import cat.uvic.teknos.dam.aeroadmin.model.model.ModelFactory;
 import cat.uvic.teknos.dam.aeroadmin.repositories.RepositoryFactory;
-import cat.uvic.teknos.dam.aeroadmin.model.model.Flight;
-import cat.uvic.teknos.dam.aeroadmin.model.enums.FlightStatus;
-import com.github.freva.asciitable.AsciiTable;
-import com.github.freva.asciitable.Column;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class FlightManager {
-    private final ModelFactory modelFactory;
-    private final RepositoryFactory repositoryFactory;
-    private final Scanner scanner;
+    private final FlightRepository repo;
+    private final ModelFactory     mf;
+    private final Scanner          sc;
 
-    public FlightManager(ModelFactory modelFactory, RepositoryFactory repositoryFactory, Scanner scanner) {
-        this.modelFactory = modelFactory;
-        this.repositoryFactory = repositoryFactory;
-        this.scanner = scanner;
+    public FlightManager(ModelFactory mf, RepositoryFactory rf, Scanner sc) {
+        this.mf   = mf;
+        this.sc   = sc;
+        this.repo = rf.getFlightRepository();
     }
 
     public void run() {
-        System.out.println("Flight manager, type:");
-        System.out.println("1 - to list all flights");
-        System.out.println("2 - to show a flight");
-        System.out.println("3 - to save a new flight");
-        System.out.println("Type 'exit' to go back");
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n--- Gestor de Vols ---");
+            System.out.println("1. Llistar vols");
+            System.out.println("2. Crear vol");
+            System.out.println("3. Actualitzar vol");
+            System.out.println("4. Eliminar vol");
+            System.out.println("0. Tornar enrere");
+            System.out.print("Tria una opció: ");
+            String c = sc.nextLine().trim();
 
-        var repository = repositoryFactory.createFlightRepository();
-
-        String command;
-        while (!Objects.equals(command = scanner.nextLine(), "exit")) {
-            switch (command) {
+            switch (c) {
                 case "1":
-                    var flights = repository.getAll();
-                    System.out.println(AsciiTable.getTable(flights, Arrays.asList(
-                            new Column().header("ID").with(f -> Integer.toString(((Flight) f).getFlightId())),
-                            new Column().header("Flight Number").with(f -> ((Flight) f).getFlightNumber()),
-                            new Column().header("Departure Airport").with(f -> ((Flight) f).getDepartureAirport()),
-                            new Column().header("Arrival Airport").with(f -> ((Flight) f).getArrivalAirport()),
-                            new Column().header("Status").with(f -> ((Flight) f).getStatus().toString())
-                    )));
+                    repo.getAll()
+                            .forEach(f -> System.out.printf(
+                                    "ID: %d | Num: %s%n",
+                                    f.getFlightId(), f.getFlightNumber()));
                     break;
-
                 case "2":
-                    System.out.print("Enter flight ID: ");
-                    int id = Integer.parseInt(scanner.nextLine());
-                    var flight = repository.get(id);
-                    if (flight != null) {
-                        System.out.println(AsciiTable.getTable(
-                                Arrays.asList(flight),
-                                Arrays.asList(
-                                        new Column().header("ID").with(f -> Integer.toString(((Flight) f).getFlightId())),
-                                        new Column().header("Flight Number").with(f -> ((Flight) f).getFlightNumber()),
-                                        new Column().header("Departure Airport").with(f -> ((Flight) f).getDepartureAirport()),
-                                        new Column().header("Arrival Airport").with(f -> ((Flight) f).getArrivalAirport()),
-                                        new Column().header("Scheduled Departure").with(f -> ((Flight) f).getScheduledDeparture().toString()),
-                                        new Column().header("Scheduled Arrival").with(f -> ((Flight) f).getScheduledArrival().toString()),
-                                        new Column().header("Status").with(f -> ((Flight) f).getStatus().toString())
-                                )
-                        ));
+                    Flight nf = mf.createFlight();
+                    System.out.print("Num de vol: "); nf.setFlightNumber(sc.nextLine());
+                    System.out.print("Sortida: ");     nf.setDepartureAirport(sc.nextLine());
+                    System.out.print("Arribada: ");     nf.setArrivalAirport(sc.nextLine());
+                    repo.save(nf);
+                    System.out.println("Vol creat.");
+                    break;
+                case "3":
+                    System.out.print("ID a actualitzar: ");
+                    int iu = Integer.parseInt(sc.nextLine());
+                    Flight fu = repo.get(iu);
+                    if (fu!=null) {
+                        System.out.print("Num actual ("+fu.getFlightNumber()+"): ");
+                        fu.setFlightNumber(sc.nextLine());
+                        repo.save(fu);
+                        System.out.println("Vol actualitzat.");
                     } else {
-                        System.out.println("Flight not found.");
+                        System.out.println("No trobat.");
                     }
                     break;
-
-                case "3":
-                    var flightToSave = modelFactory.createFlight();
-
-                    System.out.println("Flight number: ");
-                    flightToSave.setFlightNumber(scanner.nextLine());
-
-                    System.out.println("Departure airport: ");
-                    flightToSave.setDepartureAirport(scanner.nextLine());
-
-                    System.out.println("Arrival airport: ");
-                    flightToSave.setArrivalAirport(scanner.nextLine());
-
-                    System.out.println("Scheduled departure (YYYY-MM-DDTHH:mm): ");
-                    flightToSave.setScheduledDeparture(LocalDateTime.parse(scanner.nextLine()));
-
-                    System.out.println("Scheduled arrival (YYYY-MM-DDTHH:mm): ");
-                    flightToSave.setScheduledArrival(LocalDateTime.parse(scanner.nextLine()));
-
-                    System.out.println("Status [SCHEDULED, DELAYED, IN_PROGRESS, COMPLETED, CANCELLED]: ");
-                    flightToSave.setStatus(FlightStatus.valueOf(scanner.nextLine().toUpperCase()));
-
-                    // TODO: Load real airline and aircraft from DB
-                    var dummyAirline = new cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl();
-                    dummyAirline.setAirlineId(1);
-                    flightToSave.setAirline(dummyAirline);
-
-                    var dummyAircraft = new cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftImpl();
-                    dummyAircraft.setAircraftId(1);
-                    flightToSave.setAircraft(dummyAircraft);
-
-                    repository.save(flightToSave);
-                    System.out.println("Flight saved with ID: " + flightToSave.getFlightId());
+                case "4":
+                    System.out.print("ID a eliminar: ");
+                    int idd = Integer.parseInt(sc.nextLine());
+                    Flight fd = repo.get(idd);
+                    if (fd!=null) {
+                        repo.delete(fd);
+                        System.out.println("Vol eliminat.");
+                    } else {
+                        System.out.println("No trobat.");
+                    }
                     break;
-
-                default:
-                    System.out.println("Invalid command");
-                    break;
+                case "0": exit = true; break;
+                default:  System.out.println("Opció invàlida.");
             }
         }
     }

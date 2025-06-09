@@ -1,6 +1,6 @@
-package cat.uvic.teknos.dam.aeroadmin.repositories.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.repositories;
 
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraftDetail;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAircraftDetail;
 import cat.uvic.teknos.dam.aeroadmin.model.model.AircraftDetail;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftDetailRepository;
 
@@ -67,5 +67,10 @@ public class JpaAircraftDetailRepository implements AircraftDetailRepository {
     @Override
     public Set<AircraftDetail> getByPassengerCapacity(int minCapacity, int maxCapacity) {
         return Set.of();
+    }
+
+    @Override
+    public AircraftDetail create() {
+        return null;
     }
 }

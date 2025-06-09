@@ -1,90 +1,76 @@
+// src/main/java/cat/uvic/teknos/dam/aeroadmin/console/AirlineManager.java
 package cat.uvic.teknos.dam.aeroadmin.console;
 
+import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
+import cat.uvic.teknos.dam.aeroadmin.repositories.AirlineRepository;
 import cat.uvic.teknos.dam.aeroadmin.model.model.ModelFactory;
 import cat.uvic.teknos.dam.aeroadmin.repositories.RepositoryFactory;
-import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
-import com.github.freva.asciitable.AsciiTable;
-import com.github.freva.asciitable.Column;
 
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class AirlineManager {
-    private final ModelFactory modelFactory;
-    private final RepositoryFactory repositoryFactory;
-    private final Scanner scanner;
+    private final AirlineRepository repo;
+    private final ModelFactory      mf;
+    private final Scanner           sc;
 
-    public AirlineManager(ModelFactory modelFactory, RepositoryFactory repositoryFactory, Scanner scanner) {
-        this.modelFactory = modelFactory;
-        this.repositoryFactory = repositoryFactory;
-        this.scanner = scanner;
+    public AirlineManager(ModelFactory mf, RepositoryFactory rf, Scanner sc) {
+        this.mf   = mf;
+        this.sc   = sc;
+        this.repo = rf.getAirlineRepository();
     }
 
     public void run() {
-        System.out.println("Airline manager, type:");
-        System.out.println("1 - to list all airlines");
-        System.out.println("2 - to show an airline");
-        System.out.println("3 - to save a new airline");
-        System.out.println("Type 'exit' to go back");
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n--- Gestor Companyies Aèries ---");
+            System.out.println("1. Llistar");
+            System.out.println("2. Crear");
+            System.out.println("3. Actualitzar");
+            System.out.println("4. Eliminar");
+            System.out.println("0. Tornar enrere");
+            System.out.print("Tria una opció: ");
+            String c = sc.nextLine().trim();
 
-        var repository = repositoryFactory.createAirlineRepository();
-
-        String command;
-        while (!Objects.equals(command = scanner.nextLine(), "exit")) {
-            switch (command) {
+            switch (c) {
                 case "1":
-                    var airlines = repository.getAll();
-                    System.out.println(AsciiTable.getTable(airlines, Arrays.asList(
-                            new Column().with(a -> Integer.toString(a.getAirlineId())),
-                            new Column().header("Name").with(Airline::getName),
-                            new Column().header("IATA Code").with(Airline::getIataCode),
-                            new Column().header("ICAO Code").with(Airline::getIcaoCode)
-                    )));
+                    repo.getAll()
+                            .forEach(a -> System.out.printf(
+                                    "ID: %d | %s | IATA: %s%n",
+                                    a.getAirlineId(), a.getName(), a.getIataCode()));
                     break;
-
                 case "2":
-                    System.out.print("Enter airline ID: ");
-                    int id = Integer.parseInt(scanner.nextLine());
-                    var airline = repository.get(id);
-                    if (airline != null) {
-                        System.out.println(AsciiTable.getTable(Arrays.asList(airline), Arrays.asList(
-                                new Column().with(a -> Integer.toString(a.getAirlineId())),
-                                new Column().header("Name").with(Airline::getName),
-                                new Column().header("IATA Code").with(Airline::getIataCode),
-                                new Column().header("ICAO Code").with(Airline::getIcaoCode),
-                                new Column().header("Country").with(Airline::getCountry),
-                                new Column().header("Website").with(Airline::getWebsite)
-                        )));
+                    Airline na = mf.createAirline();
+                    System.out.print("Nom: ");     na.setName(sc.nextLine());
+                    System.out.print("IATA: ");    na.setIataCode(sc.nextLine());
+                    repo.save(na);
+                    System.out.println("Creat.");
+                    break;
+                case "3":
+                    System.out.print("ID a actualitzar: ");
+                    int iu2 = Integer.parseInt(sc.nextLine());
+                    Airline au = repo.get(iu2);
+                    if (au!=null) {
+                        System.out.print("Nom ("+au.getName()+"): ");
+                        au.setName(sc.nextLine());
+                        repo.save(au);
+                        System.out.println("Actualitzat.");
                     } else {
-                        System.out.println("Airline not found.");
+                        System.out.println("No trobat.");
                     }
                     break;
-
-                case "3":
-                    System.out.println("Name: ");
-                    var airlineToSave = modelFactory.createAirline();
-                    airlineToSave.setName(scanner.nextLine());
-
-                    System.out.println("IATA Code: ");
-                    airlineToSave.setIataCode(scanner.nextLine());
-
-                    System.out.println("ICAO Code: ");
-                    airlineToSave.setIcaoCode(scanner.nextLine());
-
-                    System.out.println("Country: ");
-                    airlineToSave.setCountry(scanner.nextLine());
-
-                    System.out.println("Website: ");
-                    airlineToSave.setWebsite(scanner.nextLine());
-
-                    repository.save(airlineToSave);
-                    System.out.println("Airline saved with ID: " + airlineToSave.getAirlineId());
+                case "4":
+                    System.out.print("ID a eliminar: ");
+                    int id2 = Integer.parseInt(sc.nextLine());
+                    Airline ad = repo.get(id2);
+                    if (ad!=null) {
+                        repo.delete(ad);
+                        System.out.println("Eliminat.");
+                    } else {
+                        System.out.println("No trobat.");
+                    }
                     break;
-
-                default:
-                    System.out.println("Invalid command");
-                    break;
+                case "0": exit = true; break;
+                default:  System.out.println("Opció invàlida.");
             }
         }
     }

@@ -1,92 +1,79 @@
+// src/main/java/cat/uvic/teknos/dam/aeroadmin/console/PilotManager.java
 package cat.uvic.teknos.dam.aeroadmin.console;
 
+import cat.uvic.teknos.dam.aeroadmin.model.model.Pilot;
+import cat.uvic.teknos.dam.aeroadmin.repositories.PilotRepository;
 import cat.uvic.teknos.dam.aeroadmin.model.model.ModelFactory;
 import cat.uvic.teknos.dam.aeroadmin.repositories.RepositoryFactory;
-import cat.uvic.teknos.dam.aeroadmin.model.model.Pilot;
-import com.github.freva.asciitable.AsciiTable;
-import com.github.freva.asciitable.Column;
 
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class PilotManager {
-    private final ModelFactory modelFactory;
-    private final RepositoryFactory repositoryFactory;
-    private final Scanner scanner;
+    private final PilotRepository repo;
+    private final ModelFactory    mf;
+    private final Scanner         sc;
 
-    public PilotManager(ModelFactory modelFactory, RepositoryFactory repositoryFactory, Scanner scanner) {
-        this.modelFactory = modelFactory;
-        this.repositoryFactory = repositoryFactory;
-        this.scanner = scanner;
+    public PilotManager(ModelFactory mf, RepositoryFactory rf, Scanner sc) {
+        this.mf   = mf;
+        this.sc   = sc;
+        this.repo = rf.getPilotRepository();
     }
 
     public void run() {
-        System.out.println("Pilot manager, type:");
-        System.out.println("1 - to show the list of all pilots");
-        System.out.println("2 - to show a pilot");
-        System.out.println("3 - to save a new pilot");
-        System.out.println("exit - to quit");
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n--- Gestor de Pilots ---");
+            System.out.println("1. Llistar pilots");
+            System.out.println("2. Crear pilot");
+            System.out.println("3. Actualitzar pilot");
+            System.out.println("4. Eliminar pilot");
+            System.out.println("0. Tornar enrere");
+            System.out.print("Tria una opció: ");
+            String c = sc.nextLine().trim();
 
-        var repository = repositoryFactory.getPilotRepository();
-
-        String command = "";
-        while (!Objects.equals(command = scanner.nextLine(), "exit")) {
-            switch (command) {
+            switch (c) {
                 case "1":
-                    var pilots = repository.getAll();
-                    System.out.println(AsciiTable.getTable(pilots, Arrays.asList(
-                            new Column().header("ID").with(p -> Integer.toString(((Pilot)p).getPilotId())),
-                            new Column().header("First Name").with(p -> ((Pilot)p).getFirstName()),
-                            new Column().header("Last Name").with(p -> ((Pilot)p).getLastName()),
-                            new Column().header("Nationality").with(p -> ((Pilot)p).getNationality())
-                    )));
-
+                    repo.getAll()
+                            .forEach(p -> System.out.printf(
+                                    "ID: %d | %s %s%n",
+                                    p.getPilotId(),
+                                    p.getFirstName(),
+                                    p.getLastName()));
                     break;
-
                 case "2":
-                    System.out.println("Enter pilot ID:");
-                    int id = Integer.parseInt(scanner.nextLine());
-                    var pilot = repository.get(id);
-                    if (pilot != null) {
-                        System.out.println(AsciiTable.getTable(Arrays.asList(pilot), Arrays.asList(
-                                new Column().header("ID").with(p -> Integer.toString(((Pilot)p).getPilotId())),
-                                new Column().header("First Name").with(p -> ((Pilot)p).getFirstName()),
-                                new Column().header("Last Name").with(p -> ((Pilot)p).getLastName()),
-                                new Column().header("Date of Birth").with(p -> ((Pilot)p).getDateOfBirth().toString()),
-                                new Column().header("Nationality").with(p -> ((Pilot)p).getNationality())
-                        )));
-
+                    Pilot np = mf.createPilot();
+                    System.out.print("Nom: "); np.setFirstName(sc.nextLine());
+                    System.out.print("Cognom: "); np.setLastName(sc.nextLine());
+                    repo.save(np);
+                    System.out.println("Pilot creat.");
+                    break;
+                case "3":
+                    System.out.print("ID a actualitzar: ");
+                    int iu = Integer.parseInt(sc.nextLine());
+                    Pilot pu = repo.get(iu);
+                    if (pu!=null) {
+                        System.out.print("Nom ("+pu.getFirstName()+"): ");
+                        pu.setFirstName(sc.nextLine());
+                        repo.save(pu);
+                        System.out.println("Pilot actualitzat.");
                     } else {
-                        System.out.println("Pilot not found.");
+                        System.out.println("No trobat.");
                     }
                     break;
-
-                case "3":
-                    var newPilot = modelFactory.createPilot();
-
-                    System.out.println("Enter First Name:");
-                    newPilot.setFirstName(scanner.nextLine());
-
-                    System.out.println("Enter Last Name:");
-                    newPilot.setLastName(scanner.nextLine());
-
-                    System.out.println("Enter Date of Birth (YYYY-MM-DD):");
-                    newPilot.setDateOfBirth(java.time.LocalDate.parse(scanner.nextLine()));
-
-                    System.out.println("Enter Nationality:");
-                    newPilot.setNationality(scanner.nextLine());
-
-                    repository.save(newPilot);
-                    System.out.println("Pilot saved.");
+                case "4":
+                    System.out.print("ID a eliminar: ");
+                    int idel = Integer.parseInt(sc.nextLine());
+                    Pilot pd = repo.get(idel);
+                    if (pd!=null) {
+                        repo.delete(pd);
+                        System.out.println("Pilot eliminat.");
+                    } else {
+                        System.out.println("No trobat.");
+                    }
                     break;
-
-                default:
-                    System.out.println("Invalid command");
-                    break;
+                case "0": exit = true; break;
+                default:  System.out.println("Opció invàlida.");
             }
-
-            System.out.println("\nType next command (1, 2, 3 or exit):");
         }
     }
 }

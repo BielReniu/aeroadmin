@@ -16,7 +16,12 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
     private final DataSource dataSource;
 
     public JdbcAircraftDetailRepository(DataSource dataSource) {
-        this.dataSource = new SingleConnectionDataSource();
+        this.dataSource = new DataSource() {
+            @Override
+            public Connection getConnection() {
+                return null;
+            }
+        };
     }
 
     @Override
@@ -115,5 +120,10 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
     @Override
     public Set<AircraftDetail> getByPassengerCapacity(int minCapacity, int maxCapacity) {
         return Set.of();
+    }
+
+    @Override
+    public AircraftDetail create() {
+        return null;
     }
 }

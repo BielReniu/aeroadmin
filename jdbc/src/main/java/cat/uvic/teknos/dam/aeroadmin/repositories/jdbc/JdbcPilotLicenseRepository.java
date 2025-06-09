@@ -16,7 +16,12 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
     private final DataSource dataSource;
 
     public JdbcPilotLicenseRepository(DataSource dataSource) {
-        this.dataSource = new SingleConnectionDataSource();
+        this.dataSource = new DataSource() {
+            @Override
+            public Connection getConnection() {
+                return null;
+            }
+        };
     }
 
     @Override
@@ -116,5 +121,10 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
     @Override
     public Set<PilotLicense> getByLicenseType(LicenseType licenseType) {
         return Set.of();
+    }
+
+    @Override
+    public PilotLicense create() {
+        return null;
     }
 }

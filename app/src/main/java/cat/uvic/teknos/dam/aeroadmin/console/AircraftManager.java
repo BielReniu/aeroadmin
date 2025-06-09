@@ -1,98 +1,119 @@
 package cat.uvic.teknos.dam.aeroadmin.console;
 
-import cat.uvic.teknos.dam.aeroadmin.model.model.ModelFactory;
-import cat.uvic.teknos.dam.aeroadmin.repositories.RepositoryFactory;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
-import com.github.freva.asciitable.AsciiTable;
-import com.github.freva.asciitable.Column;
+import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
+import cat.uvic.teknos.dam.aeroadmin.model.model.ModelFactory;
+import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
+import cat.uvic.teknos.dam.aeroadmin.repositories.RepositoryFactory;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 public class AircraftManager {
+
     private final ModelFactory modelFactory;
     private final RepositoryFactory repositoryFactory;
+    private final AircraftRepository repository;
     private final Scanner scanner;
 
-    public AircraftManager(ModelFactory modelFactory, RepositoryFactory repositoryFactory, Scanner scanner) {
-        this.modelFactory = modelFactory;
+    public AircraftManager(ModelFactory modelFactory,
+                           RepositoryFactory repositoryFactory,
+                           Scanner scanner) {
+        this.modelFactory      = modelFactory;
         this.repositoryFactory = repositoryFactory;
-        this.scanner = scanner;
+        this.repository        = repositoryFactory.getAircraftRepository();
+        this.scanner           = scanner;
     }
 
     public void run() {
-        System.out.println("Aircraft manager, type:");
-        System.out.println("1 - to list all aircraft");
-        System.out.println("2 - to show an aircraft");
-        System.out.println("3 - to save a new aircraft");
-        System.out.println("Type 'exit' to go back");
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\n--- Gestor d'Avions ---");
+            System.out.println("1. Llistar avions");
+            System.out.println("2. Mostrar avió");
+            System.out.println("3. Guardar nou avió");
+            System.out.println("4. Eliminar avió");
+            System.out.println("0. Tornar enrere");
+            System.out.print("Tria una opció: ");
 
-        var repository = repositoryFactory.getAircraftRepository(); // Canviat a get...()
-        if (repository == null) {
-            System.err.println("Error: AircraftRepository is null!");
-            return;
-        }
-
-        String command;
-        while (!Objects.equals(command = scanner.nextLine(), "exit")) {
-            switch (command) {
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
                 case "1":
-                    var aircrafts = repository.getAll();
-                    System.out.println(AsciiTable.getTable(aircrafts, Arrays.asList(
-                            new Column().with(a -> Integer.toString(a.getAircraftId())),
-                            new Column().header("Model").with(Aircraft::getModel),
-                            new Column().header("Manufacturer").with(Aircraft::getManufacturer),
-                            new Column().header("Registration").with(Aircraft::getRegistrationNumber)
-                    )));
+                    repository.getAll().forEach(a ->
+                            System.out.printf("ID: %d | Model: %s | Fabricant: %s%n",
+                                    a.getAircraftId(), a.getModel(), a.getManufacturer()));
                     break;
 
                 case "2":
-                    System.out.print("Enter aircraft ID: ");
-                    int id = Integer.parseInt(scanner.nextLine());
-                    var aircraft = repository.get(id);
-                    if (aircraft != null) {
-                        System.out.println(AsciiTable.getTable(Set.of(aircraft), Arrays.asList(
-                                new Column().with(a -> Integer.toString(a.getAircraftId())),
-                                new Column().header("Model").with(Aircraft::getModel),
-                                new Column().header("Manufacturer").with(Aircraft::getManufacturer),
-                                new Column().header("Registration").with(Aircraft::getRegistrationNumber),
-                                new Column().header("Production Year").with(a -> Integer.toString(a.getProductionYear()))
-                        )));
-                    } else {
-                        System.out.println("Aircraft not found.");
-                    }
+                    System.out.print("Introdueix ID a mostrar: ");
+                    int idShow = Integer.parseInt(scanner.nextLine());
+                    Aircraft shown = repository.get(idShow);
+                    System.out.println(shown != null ? shown : "Avió no trobat.");
                     break;
 
                 case "3":
-                    Aircraft aircraftToSave = modelFactory.createAircraft();
+                    // 1) Demanem dades bàsiques
+                    Aircraft newAircraft = modelFactory.createAircraft();
+                    System.out.print("Model: ");
+                    newAircraft.setModel(scanner.nextLine());
+                    System.out.print("Fabricant: ");
+                    newAircraft.setManufacturer(scanner.nextLine());
+                    System.out.print("Matrícula: ");
+                    newAircraft.setRegistrationNumber(scanner.nextLine());
+                    System.out.print("Any de producció: ");
+                    newAircraft.setProductionYear(Integer.parseInt(scanner.nextLine()));
 
-                    System.out.println("Description (model): ");
-                    aircraftToSave.setModel(scanner.nextLine());
+                    // 2) Llistar companyies disponibles
+                    List<Airline> airlines =
+                            (List<Airline>) repositoryFactory.getAirlineRepository().getAll();
+                    System.out.println("\nCompanyies Aèries disponibles:");
+                    airlines.forEach(al ->
+                            System.out.printf("  ID: %d | Nom: %s | IATA: %s%n",
+                                    al.getAirlineId(), al.getName(), al.getIataCode()));
 
-                    System.out.println("Manufacturer: ");
-                    aircraftToSave.setManufacturer(scanner.nextLine());
+                    // 3) Demanar i validar l'ID de la companyia
+                    System.out.print("Introdueix ID de la Companyia Aèria: ");
+                    String airlineInput = scanner.nextLine().trim();
+                    int airlineId;
+                    try {
+                        airlineId = Integer.parseInt(airlineInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("❌ L'ID ha de ser un número. Abortant operació.");
+                        break;
+                    }
 
-                    System.out.println("Registration number: ");
-                    aircraftToSave.setRegistrationNumber(scanner.nextLine());
+                    Airline airline = repositoryFactory
+                            .getAirlineRepository()
+                            .get(airlineId);
+                    if (airline == null) {
+                        System.out.println("❌ Companyia no trobada. Abortant operació.");
+                        break;
+                    }
+                    newAircraft.setAirline(airline);
 
-                    System.out.println("Production year: ");
-                    aircraftToSave.setProductionYear(Integer.parseInt(scanner.nextLine()));
+                    // 4) Guardar l'avió
+                    repository.save(newAircraft);
+                    System.out.println("✅ Avió guardat correctament.");
+                    break;
 
-                    // TODO: Load real airline from DB
-                    var dummyAirline = new cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl();
-                    dummyAirline.setAirlineId(1); // Hardcoded for now
-                    aircraftToSave.setAirline(dummyAirline);
+                case "4":
+                    System.out.print("Introdueix ID a eliminar: ");
+                    int idDel = Integer.parseInt(scanner.nextLine());
+                    Aircraft toDelete = repository.get(idDel);
+                    if (toDelete != null) {
+                        repository.delete(toDelete);
+                        System.out.println("✅ Avió eliminat.");
+                    } else {
+                        System.out.println("Avió no trobat.");
+                    }
+                    break;
 
-                    repository.save(aircraftToSave);
-                    System.out.println("Aircraft saved with ID: " + aircraftToSave.getAircraftId());
+                case "0":
+                    exit = true;
                     break;
 
                 default:
-                    System.out.println("Invalid command");
-                    break;
+                    System.out.println("Opció invàlida.");
             }
         }
     }

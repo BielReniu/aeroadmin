@@ -1,6 +1,6 @@
 package cat.uvic.teknos.dam.aeroadmin.model.jpa;
 
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraft;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAircraft;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
 import org.junit.jupiter.api.Test;
 

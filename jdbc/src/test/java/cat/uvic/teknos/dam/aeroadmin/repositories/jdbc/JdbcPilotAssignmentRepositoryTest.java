@@ -5,6 +5,7 @@ import cat.uvic.teknos.dam.aeroadmin.model.enums.FlightStatus;
 import cat.uvic.teknos.dam.aeroadmin.model.model.*;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.*;
 import cat.uvic.teknos.dam.aeroadmin.repositories.PilotAssignmentRepository;
+import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 import org.junit.jupiter.api.*;
 
@@ -39,7 +40,7 @@ class JdbcPilotAssignmentRepositoryTest {
     @BeforeEach
     void setUp() throws SQLException {
         createTables();
-        repository = new JdbcPilotAssignmentRepository(new SingleConnectionDataSource());
+        repository = new JdbcPilotAssignmentRepository((DataSource) new SingleConnectionDataSource());
     }
 
     @AfterEach
@@ -175,7 +176,7 @@ class JdbcPilotAssignmentRepositoryTest {
         airline.setCountry(country);
         airline.setFoundationYear(foundationYear);
         airline.setWebsite(website);
-        new JdbcAirlineRepository(new SingleConnectionDataSource()).save(airline);
+        new JdbcAirlineRepository((DataSource) new SingleConnectionDataSource()).save(airline);
         return airline;
     }
 
@@ -186,7 +187,7 @@ class JdbcPilotAssignmentRepositoryTest {
         aircraft.setRegistrationNumber(registrationNumber);
         aircraft.setProductionYear(productionYear);
         aircraft.setAirline(airline);
-        new JdbcAircraftRepository(new SingleConnectionDataSource()).save(aircraft);
+        new JdbcAircraftRepository((DataSource) new SingleConnectionDataSource()).save(aircraft);
         return aircraft;
     }
 
@@ -202,7 +203,7 @@ class JdbcPilotAssignmentRepositoryTest {
         flight.setStatus(status);
         flight.setAircraft(aircraft);
         flight.setAirline(airline);
-        new JdbcFlightRepository(new SingleConnectionDataSource()).save(flight);
+        new JdbcFlightRepository((DataSource) new SingleConnectionDataSource()).save(flight);
         return flight;
     }
 
@@ -213,7 +214,7 @@ class JdbcPilotAssignmentRepositoryTest {
         pilot.setLicenseNumber(licenseNumber);
         pilot.setRole(role);
         pilot.setExperienceYears(experienceYears);
-        new JdbcPilotRepository(new SingleConnectionDataSource()).save(pilot);
+        new JdbcPilotRepository((DataSource) new SingleConnectionDataSource()).save(pilot);
         return pilot;
     }
 

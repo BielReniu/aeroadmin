@@ -1,6 +1,6 @@
-package cat.uvic.teknos.dam.aeroadmin.repositories.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.repositories;
 
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilot;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilot;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Pilot;
 import cat.uvic.teknos.dam.aeroadmin.repositories.PilotRepository;
@@ -68,5 +68,10 @@ public class JpaPilotRepository implements PilotRepository {
     @Override
     public Set<Pilot> getByAirline(Airline airline) {
         return Set.of();
+    }
+
+    @Override
+    public Pilot create() {
+        return null;
     }
 }

@@ -1,9 +1,8 @@
-package cat.uvic.teknos.dam.aeroadmin.repositories.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.repositories;
 
-import cat.uvic.teknos.dam.aeroadmin.model.enums.LicenseType;
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotLicense;
-import cat.uvic.teknos.dam.aeroadmin.model.model.PilotLicense;
-import cat.uvic.teknos.dam.aeroadmin.repositories.PilotLicenseRepository;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAircraft;
+import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
+import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -13,36 +12,36 @@ import jakarta.persistence.TypedQuery;
 import java.util.HashSet;
 import java.util.Set;
 
-public class JpaPilotLicenseRepository implements PilotLicenseRepository {
+public class JpaAircraftRepository implements AircraftRepository {
 
     private final EntityManagerFactory entityManagerFactory;
 
-    public JpaPilotLicenseRepository(EntityManagerFactory entityManagerFactory) {
+    public JpaAircraftRepository(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
     }
 
     @Override
-    public void save(PilotLicense license) {
+    public void save(Aircraft aircraft) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            if (((JpaPilotLicense) license).getPilotId() == 0)
-                em.persist(license);
+            if (((JpaAircraft) aircraft).getAircraftId() == 0)
+                em.persist(aircraft);
             else
-                em.merge(license);
+                em.merge(aircraft);
 
             tx.commit();
         }
     }
 
     @Override
-    public void delete(PilotLicense license) {
+    public void delete(Aircraft aircraft) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            PilotLicense toDelete = em.find(JpaPilotLicense.class, ((JpaPilotLicense) license).getPilotId());
+            Aircraft toDelete = em.find(JpaAircraft.class, ((JpaAircraft) aircraft).getAircraftId());
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -51,22 +50,27 @@ public class JpaPilotLicenseRepository implements PilotLicenseRepository {
     }
 
     @Override
-    public PilotLicense get(Integer id) {
+    public Aircraft get(Integer id) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            return em.find(JpaPilotLicense.class, id);
+            return em.find(JpaAircraft.class, id);
         }
     }
 
     @Override
-    public Set<PilotLicense> getAll() {
+    public Set<Aircraft> getAll() {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-            TypedQuery<JpaPilotLicense> query = em.createQuery("SELECT l FROM JpaPilotLicense l", JpaPilotLicense.class);
+            TypedQuery<JpaAircraft> query = em.createQuery("SELECT a FROM JpaAircraft a", JpaAircraft.class);
             return new HashSet<>(query.getResultList());
         }
     }
 
     @Override
-    public Set<PilotLicense> getByLicenseType(LicenseType licenseType) {
+    public Set<Aircraft> getByManufacturer(String manufacturer) {
         return Set.of();
+    }
+
+    @Override
+    public Aircraft create() {
+        return null;
     }
 }

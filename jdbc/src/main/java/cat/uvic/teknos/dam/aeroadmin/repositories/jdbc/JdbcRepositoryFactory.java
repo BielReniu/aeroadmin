@@ -4,12 +4,19 @@ import cat.uvic.teknos.dam.aeroadmin.repositories.*;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 
+import java.sql.Connection;
+
 public class JdbcRepositoryFactory implements RepositoryFactory {
 
     private final DataSource dataSource;
 
     public JdbcRepositoryFactory() {
-        this.dataSource = new SingleConnectionDataSource();
+        this.dataSource = new DataSource() {
+            @Override
+            public Connection getConnection() {
+                return null;
+            }
+        };
     }
 
     @Override

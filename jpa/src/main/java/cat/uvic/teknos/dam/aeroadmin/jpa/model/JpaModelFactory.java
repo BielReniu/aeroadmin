@@ -1,4 +1,4 @@
-package cat.uvic.teknos.dam.aeroadmin.model.jpa;
+package cat.uvic.teknos.dam.aeroadmin.jpa.model;
 
 import cat.uvic.teknos.dam.aeroadmin.model.model.*;
 
@@ -10,8 +10,13 @@ public class JpaModelFactory implements ModelFactory {
     }
 
     @Override
+    public Pilot createPilot() {
+        return new JpaPilot();
+    }
+
+    @Override
     public AircraftDetail createAircraftDetail() {
-        return new JpaAircraftDetail();
+        return null;
     }
 
     @Override
@@ -20,18 +25,13 @@ public class JpaModelFactory implements ModelFactory {
     }
 
     @Override
-    public Pilot createPilot() {
-        return new JpaPilot();
-    }
-
-    @Override
     public PilotLicense createPilotLicense() {
-        return new JpaPilotLicense();
+        return null;
     }
 
     @Override
     public PilotAssignment createPilotAssignment() {
-        return new JpaPilotAssignment();
+        return null;
     }
 
     @Override

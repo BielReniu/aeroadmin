@@ -17,7 +17,12 @@ public class JdbcPilotRepository implements PilotRepository {
     private final DataSource dataSource;
 
     public JdbcPilotRepository(DataSource dataSource) {
-        this.dataSource = new SingleConnectionDataSource();
+        this.dataSource = new DataSource() {
+            @Override
+            public Connection getConnection() {
+                return null;
+            }
+        };
     }
 
     @Override
@@ -129,5 +134,10 @@ public class JdbcPilotRepository implements PilotRepository {
     @Override
     public Set<Pilot> getByAirline(Airline airline) {
         return Set.of();
+    }
+
+    @Override
+    public Pilot create() {
+        return null;
     }
 }

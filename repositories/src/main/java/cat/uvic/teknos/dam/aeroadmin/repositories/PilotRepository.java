@@ -7,4 +7,6 @@ import java.util.Set;
 
 public interface PilotRepository extends Repository<Integer, Pilot> {
     Set<Pilot> getByAirline(Airline airline);
+
+    Pilot create();
 }

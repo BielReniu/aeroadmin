@@ -1,6 +1,6 @@
 package cat.uvic.teknos.dam.aeroadmin.model.jpa;
 
-import cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotLicense;
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilotLicense;
 import cat.uvic.teknos.dam.aeroadmin.model.model.PilotLicense;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;

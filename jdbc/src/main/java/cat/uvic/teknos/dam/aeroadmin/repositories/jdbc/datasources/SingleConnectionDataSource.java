@@ -1,78 +1,42 @@
 package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources;
 
-import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.exceptions.DataSourceException;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.util.logging.Logger;
 
 public class SingleConnectionDataSource implements DataSource {
-    private Connection connection;
-    private final String driver;
-    private final String server;
-    private final String database;
-    private final String user;
-    private final String password;
+    private static final String URL =
+            "jdbc:mysql://127.0.0.1:3306/AVIATION_SYSTEM"
+                    + "?useSSL=false"
+                    + "&allowPublicKeyRetrieval=true"
+                    + "&serverTimezone=UTC";
+    // Ara usem root, que ja té tots els permisos des de qualsevol host
+    private static final String USER     = "root";
+    private static final String PASSWORD = "1qaz2wsx3edc";
 
-    public SingleConnectionDataSource(String driver, String server, String database, String user, String password) {
-        this.driver = driver;
-        this.server = server;
-        this.database = database;
-        this.user = user;
-        this.password = password;
-    }
-
-    public SingleConnectionDataSource() {
-        var properties = new Properties();
-
-        try {
-            properties.load(this.getClass().getResourceAsStream("/datasource.properties"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        driver = properties.getProperty("driver");
-        server = properties.getProperty("server");
-        database = properties.getProperty("database");
-        user = properties.getProperty("user");
-        password = properties.getProperty("password");
-    }
+    private Connection conn;
 
     @Override
-    public Connection getConnection() {
-        if (connection == null) {
-            try {
-                connection = DriverManager.getConnection(String.format("jdbc:%s://%s/%s", driver, server, database),
-                        user,
-                        password);
-            } catch (SQLException e) {
-                throw new DataSourceException("Invalid parameters", e);
-            }
+    public Connection getConnection() throws SQLException {
+        if (conn == null || conn.isClosed()) {
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
         }
-
-        return connection;
+        return conn;
     }
-
-    public String getDriver() {
-        return driver;
+    @Override public Connection getConnection(String u, String p) throws SQLException {
+        return getConnection();
     }
-
-    public String getServer() {
-        return server;
+    @Override public PrintWriter getLogWriter() { return null; }
+    @Override public void setLogWriter(PrintWriter out) { }
+    @Override public void setLoginTimeout(int seconds) { DriverManager.setLoginTimeout(seconds); }
+    @Override public int getLoginTimeout() { return DriverManager.getLoginTimeout(); }
+    @Override public Logger getParentLogger() { return Logger.getLogger("global"); }
+    @Override public <T> T unwrap(Class<T> iface) throws SQLException {
+        if (DataSource.class.isAssignableFrom(iface)) return iface.cast(this);
+        throw new SQLException("No s'implementa " + iface.getName());
     }
-
-    public String getDatabase() {
-        return database;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getPassword() {
-        return password;
+    @Override public boolean isWrapperFor(Class<?> iface) {
+        return DataSource.class.isAssignableFrom(iface);
     }
 }
