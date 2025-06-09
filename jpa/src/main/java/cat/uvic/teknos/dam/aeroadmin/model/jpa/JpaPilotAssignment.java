@@ -68,8 +68,8 @@ public class JpaPilotAssignment implements PilotAssignment {
         this.assignedAt = assignedAt;
     }
 
-    public String getRole() {
-        return role;
+    public AssignmentRole getRole() {
+        return AssignmentRole.valueOf(role);
     }
 
     @Override
