@@ -3,6 +3,7 @@ package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 import cat.uvic.teknos.dam.aeroadmin.model.model.AircraftDetail;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftDetailImpl;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftDetailRepository;
+import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.JdbcAircraftDetailRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 import org.junit.jupiter.api.*;
 

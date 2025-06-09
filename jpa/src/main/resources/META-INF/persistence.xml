@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <!-- Unitat de persistència principal -->
+    <persistence-unit name="aerodmin" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Entitats JPA -->
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraft</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraftDetail</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAirline</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaFlight</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilot</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotLicense</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotAssignment</class>
+
+        <properties>
+            <!-- Configuració JDBC -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/aerodmin?useSSL=false&amp;serverTimezone=UTC"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="yourpassword"/>
+
+            <!-- Propietats Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+
+    <!-- Unitat de persistència per proves -->
+    <persistence-unit name="aerodmin_test" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Entitats JPA -->
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraft</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAircraftDetail</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaAirline</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaFlight</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilot</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotLicense</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.model.jpa.JpaPilotAssignment</class>
+
+        <properties>
+            <!-- Configuració JDBC per a tests -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/aerodmin_test?useSSL=false&amp;serverTimezone=UTC"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="yourpassword"/>
+
+            <!-- Propietats Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+
+</persistence>

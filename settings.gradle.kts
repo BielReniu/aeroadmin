@@ -13,3 +13,4 @@ plugins {
 rootProject.name = "aeroadmin"
 include("app", "utilities", "model")
 include("repositories", "jdbc")
+include("jpa")
