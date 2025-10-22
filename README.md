@@ -1,76 +1,76 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-yellow.svg)](#)
-]\(LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-# AeroAdmin
+# 🛫 AeroAdmin
 
-> ⚙️ A cutting-edge Java CLI for seamless airline administration with flexible persistence engines (JDBC or JPA).
-
----
-
-## 📋 Table of Contents
-
-* [🚀 Features](#-features)
-* [🛠️ Tech Stack](#-tech-stack)
-* [📦 Getting Started](#-getting-started)
-* [⚙️ Configuration](#-configuration)
-* [▶️ Usage](#-usage)
-* [📂 Project Structure](#-project-structure)
-* [📝 Version History](#-version-history)
-* [👥 Contributing](#-contributing)
-* [📄 License](#-license)
+> ⚙️ Aplicació Java per a la gestió d’aerolínies, amb una **CLI autònoma**, **arquitectura client/servidor** i **mòduls de persistència flexibles** (JDBC o JPA).
 
 ---
 
-## 🚀 Features
+## 📋 Taula de Continguts
 
-* 🔄 **Dual Persistence**: Switch between JDBC and JPA (Hibernate) at startup.
-* ✈️ **Full CRUD**: Manage Aircraft, Pilots, Airlines, and Flights.
-* 🖥️ **Interactive CLI**: User-friendly menu with validation and ASCII tables.
-* 📦 **Modular Architecture**: Clear separation of concerns (model, repositories, console).
-* 🔄 **Auto Schema Update**: Hibernate `hbm2ddl.auto = update` for swift development.
-* 📊 **ASCII UI**: Console tables powered by `ascii-table`.
-
----
-
-## 🛠️ Tech Stack
-
-| Component           | Technology              |
-| ------------------- | ----------------------- |
-| **Language**        | Java 21                 |
-| **Build Tool**      | Gradle (Kotlin DSL)     |
-| **Persistence**     | JDBC, JPA (Hibernate 7) |
-| **Database**        | MySQL 8 (Docker)        |
-| **Console UI**      | ascii-table             |
-| **Dependency Mgmt** | Maven Central           |
+- [🚀 Funcionalitats](#-funcionalitats)
+- [🛠️ Stack Tecnològic](#-stack-tecnològic)
+- [📦 Primers Passos](#-primers-passos)
+- [⚙️ Configuració](#-configuració)
+- [▶️ Ús](#-ús)
+- [📂 Estructura del Projecte](#-estructura-del-projecte)
+- [📝 Historial de Versions](#-historial-de-versions)
+- [👥 Contribucions](#-contribucions)
+- [📄 Llicència](#-llicència)
 
 ---
 
-## 📦 Getting Started
+## 🚀 Funcionalitats
 
-### Prerequisites
+- 🔄 **Persistència Dual:** Canvia fàcilment entre JDBC i JPA (Hibernate) en iniciar la CLI.  
+- ✈️ **CRUD Complet:** Gestió d’Aeronaus, Pilots, Aerolínies i Vols.  
+- 🖥️ **CLI Interactiva:** Menús intuïtius amb validació i taules ASCII.  
+- 📦 **Arquitectura Modular:** Separació clara entre model, repositoris i consola.  
+- 🌐 **Client/Servidor:** Inclou servidor HTTP lleuger (`rawhttp`) i client de consola remot.  
+- 🔧 **Actualització Automàtica d’Esquema:** Hibernate `hbm2ddl.auto=update` per a un desenvolupament àgil.  
+- 📊 **Interfície ASCII:** Visualització estructurada amb `ascii-table`.
 
-* Java JDK 21
-* Docker & Docker Compose
-* Git
+---
 
-### Quick Setup
+## 🛠️ Stack Tecnològic
+
+| Component | Tecnologia |
+|------------|-------------|
+| **Llenguatge** | Java 21 |
+| **Eina de Build** | Gradle (Kotlin DSL) |
+| **Persistència** | JDBC, JPA (Hibernate 7) |
+| **Base de Dades** | MySQL 8 (Docker) |
+| **UI de Consola** | `ascii-table` |
+| **Comunicació Xarxa** | `rawhttp-core`, `Gson` |
+| **Gestió de Dependències** | Maven Central |
+
+---
+
+## 📦 Primers Passos
+
+### 🔧 Prerequisits
+
+- Java JDK 21  
+- Docker i Docker Compose  
+- Git  
+
+### ⚡ Instal·lació Ràpida (CLI Autònoma)
 
 ```bash
-# Clone repo
+# Clonar el repositori
 git clone https://github.com/yourusername/aeroadmin.git
 cd aeroadmin
 
-# Launch MySQL + phpMyAdmin
+# Engegar MySQL + phpMyAdmin
 docker-compose up -d
 
-# Build and run
-./gradlew clean build
-java -cp "$(find . -type d | grep -E 'build/(classes/java/main|resources/main)' | tr '\n' ':')" \
-    cat.uvic.teknos.dam.aeroadmin.console.App
+# Compilar i executar la consola principal
+./gradlew :app:run
 ```
 
-**Select persistence strategy:**
+En iniciar, selecciona el motor de persistència:
 
 ```text
 1) JDBC
@@ -79,9 +79,9 @@ java -cp "$(find . -type d | grep -E 'build/(classes/java/main|resources/main)' 
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Configuració
 
-### `di.properties` (app/src/main/resources)
+### 🧩 `di.properties` (app/src/main/resources)
 
 ```properties
 repository_factory.jdbc=cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.JdbcRepositoryFactory
@@ -89,7 +89,7 @@ repository_factory.jpa=cat.uvic.teknos.dam.aeroadmin.jpa.repositories.JpaReposit
 model_factory=cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaModelFactory
 ```
 
-### `persistence.xml` (app/src/main/resources/META-INF)
+### 🗃️ `persistence.xml` (jpa/src/main/resources/META-INF)
 
 ```xml
 <property name="jakarta.persistence.jdbc.url"
@@ -100,13 +100,14 @@ model_factory=cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaModelFactory
 
 ---
 
-## ▶️ Usage
+## ▶️ Ús
 
-1. **Start app** and choose persistence engine.
-2. **Navigate menus** to list, create, update, or delete entities.
-3. **Exit** by selecting `0` in any manager.
+1. Executa l’aplicació amb `./gradlew :app:run`.  
+2. Tria l’estratègia de persistència (`JDBC` o `JPA`).  
+3. Navega pels menús per **llistar**, **crear**, **editar** o **eliminar** entitats.  
+4. Prem `0` per sortir en qualsevol moment.
 
-Example flow:
+**Exemple de sessió:**
 
 ```text
 > 1 (JDBC)
@@ -119,32 +120,49 @@ Example flow:
 
 ---
 
-## 📂 Project Structure
+## 📂 Estructura del Projecte
 
 ```bash
 aeroadmin/
-├─ app/           # Console application
-├─ jdbc/          # JDBC repositories
-├─ jpa/           # JPA repositories
-├─ model/         # Domain models and factories
-├─ repositories/  # Repository interfaces
-├─ utilities/     # Shared utilities (DataSource)
+├─ app/              # Aplicació principal (CLI autònoma)
+├─ clients/console/  # Client de consola remot
+├─ jdbc/             # Implementació JDBC
+├─ jpa/              # Implementació JPA
+├─ model/            # Models de domini i fàbriques
+├─ repositories/     # Interfícies de repositori
+├─ server/           # Servidor HTTP lleuger
 └─ docker-compose.yml
 ```
 
 ---
 
-## 📝 Version History
+## 📝 Historial de Versions
 
-| Version   | Description                          |
-| --------- | ------------------------------------ |
-| **0.1.0** | Initial import                       |
-| **0.1.1** | Added README                         |
-| **0.2.0** | Added model project                  |
-| **0.3.0** | Created repository module            |
-| **0.4.0** | Partial JDBC implementation          |
-| **1.0.0** | Complete JDBC implementation + tests |
-| **1.1.0** | Complete JPA implementation + tests  |
-| **1.1.1** | Final JPA corrections                |
+| Versió | Descripció |
+|---------|-------------|
+| **0.1.0** | Importació inicial |
+| **0.1.1** | Afegit README |
+| **0.2.0** | Afegit mòdul `model` |
+| **0.3.0** | Creat mòdul `repositories` |
+| **0.4.0** | Implementació parcial JDBC |
+| **1.0.0** | Implementació completa JDBC + tests |
+| **1.1.0** | Implementació completa JPA + tests |
+| **1.1.1** | Correccions finals JPA |
+| **1.2.0** | Afegida arquitectura Client/Servidor (`server` i `clients/console`) |
 
-https://github.com/BielReniu/aeroadmin
+---
+
+## 👥 Contribucions
+
+Les contribucions són benvingudes!  
+Si vols millorar el projecte, fes un *fork*, crea una branca i envia un *pull request*.
+
+---
+
+## 📄 Llicència
+
+Aquest projecte està sota la llicència [MIT](LICENSE).
+
+---
+
+🔗 [Repositori Oficial](https://github.com/BielReniu/aeroadmin)
