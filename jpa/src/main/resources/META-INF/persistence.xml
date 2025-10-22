@@ -8,19 +8,22 @@
     <persistence-unit name="aerodmin" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAircraft</class>
-        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilot</class>
         <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAirline</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAircraft</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAircraftDetail</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilot</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilotLicense</class>
         <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaFlight</class>
+        <class>cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilotAssignment</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver"
                       value="com.mysql.cj.jdbc.Driver"/>
             <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:mysql://127.0.0.1:3306/AVIATION_SYSTEM?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/>
-            <!-- Ara usem root -->
-            <property name="jakarta.persistence.jdbc.user" value="root"/>
-            <property name="jakarta.persistence.jdbc.password" value="1qaz2wsx3edc"/>
+                      value="jdbc:mysql://127.0.0.1:3307/mydb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/>
+
+            <property name="jakarta.persistence.jdbc.user" value="teknos"/>
+            <property name="jakarta.persistence.jdbc.password" value="teknos"/>
 
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.show_sql"   value="true"/>

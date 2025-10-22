@@ -2,8 +2,6 @@ package cat.uvic.teknos.dam.aeroadmin.jpa.model;
 
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "airline")
@@ -11,25 +9,26 @@ public class JpaAirline implements Airline {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "airline_id")
     private int airlineId;
 
-    private String name;
+    @Column(name = "airline_name")
+    private String airlineName;
+
+    @Column(name = "iata_code")
     private String iataCode;
+
+    @Column(name = "icao_code")
     private String icaoCode;
+
     private String country;
+
+    @Column(name = "foundation_year")
     private Integer foundationYear;
+
     private String website;
 
-    @OneToMany(mappedBy = "airline", cascade = CascadeType.ALL)
-    private Set<JpaAircraft> aircrafts = new HashSet<>();
-
-    @OneToMany(mappedBy = "airline", cascade = CascadeType.ALL)
-    private Set<JpaPilot> pilots = new HashSet<>();
-
-    @OneToMany(mappedBy = "airline", cascade = CascadeType.ALL)
-    private Set<JpaFlight> flights = new HashSet<>();
-
-    // Getters y setters
+    // Getters i Setters que implementen la interfície Airline
 
     @Override
     public int getAirlineId() {
@@ -42,13 +41,13 @@ public class JpaAirline implements Airline {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getAirlineName() {
+        return airlineName;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setAirlineName(String airlineName) {
+        this.airlineName = airlineName;
     }
 
     @Override
@@ -99,10 +98,5 @@ public class JpaAirline implements Airline {
     @Override
     public void setWebsite(String website) {
         this.website = website;
-    }
-
-    @Override
-    public void setCode(String ib) {
-
     }
 }

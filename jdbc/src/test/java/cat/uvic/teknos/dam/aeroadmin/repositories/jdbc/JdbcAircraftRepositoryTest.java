@@ -5,6 +5,7 @@ import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
+import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 import org.junit.jupiter.api.*;
 
@@ -37,7 +38,7 @@ class JdbcAircraftRepositoryTest {
     @BeforeEach
     void setUp() throws SQLException {
         createTables();
-        repository = new JdbcAircraftRepository(new SingleConnectionDataSource());
+        repository = new JdbcAircraftRepository((DataSource) new SingleConnectionDataSource());
     }
 
     @AfterEach

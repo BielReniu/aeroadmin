@@ -25,12 +25,7 @@ public class JpaAircraftDetailRepository implements AircraftDetailRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-
-            if (((JpaAircraftDetail) detail).getAircraftId() == 0)
-                em.persist(detail);
-            else
-                em.merge(detail);
-
+            em.merge(detail); // Simplificat i més robust
             tx.commit();
         }
     }
@@ -41,7 +36,10 @@ public class JpaAircraftDetailRepository implements AircraftDetailRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            AircraftDetail toDelete = em.find(JpaAircraftDetail.class, ((JpaAircraftDetail) detail).getAircraftId());
+            // Cal fer un cast per accedir al mètode getId de la implementació JPA
+            int id = ((JpaAircraftDetail) detail).getAircraftId();
+            AircraftDetail toDelete = em.find(JpaAircraftDetail.class, id);
+
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -66,11 +64,19 @@ public class JpaAircraftDetailRepository implements AircraftDetailRepository {
 
     @Override
     public Set<AircraftDetail> getByPassengerCapacity(int minCapacity, int maxCapacity) {
-        return Set.of();
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            TypedQuery<JpaAircraftDetail> query = em.createQuery(
+                    "SELECT d FROM JpaAircraftDetail d WHERE d.passengerCapacity BETWEEN :min AND :max",
+                    JpaAircraftDetail.class
+            );
+            query.setParameter("min", minCapacity);
+            query.setParameter("max", maxCapacity);
+            return new HashSet<>(query.getResultList());
+        }
     }
 
     @Override
     public AircraftDetail create() {
-        return null;
+        return new JpaAircraftDetail();
     }
 }

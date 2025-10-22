@@ -6,6 +6,7 @@ import jakarta.persistence.Persistence;
 
 public class JpaRepositoryFactory implements RepositoryFactory {
 
+    // ⚠️ Recorda comprovar que "aerodmin" és el nom correcte de la teva persistence-unit a persistence.xml
     private static final EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("aerodmin");
 
@@ -42,45 +43,5 @@ public class JpaRepositoryFactory implements RepositoryFactory {
     @Override
     public FlightRepository getFlightRepository() {
         return new JpaFlightRepository(emf);
-    }
-
-    //
-    // Si el teu interface defineix també mètodes `createXxxRepository()`,
-    // pots fer que deleguin als `getXxxRepository()`, per exemple:
-    //
-
-    @Override
-    public AircraftRepository createAircraftRepository() {
-        return getAircraftRepository();
-    }
-
-    @Override
-    public AircraftDetailRepository createAircraftDetailRepository() {
-        return getAircraftDetailRepository();
-    }
-
-    @Override
-    public PilotRepository createPilotRepository() {
-        return getPilotRepository();
-    }
-
-    @Override
-    public PilotLicenseRepository createPilotLicenseRepository() {
-        return getPilotLicenseRepository();
-    }
-
-    @Override
-    public PilotAssignmentRepository createPilotAssignmentRepository() {
-        return getPilotAssignmentRepository();
-    }
-
-    @Override
-    public AirlineRepository createAirlineRepository() {
-        return getAirlineRepository();
-    }
-
-    @Override
-    public FlightRepository createFlightRepository() {
-        return getFlightRepository();
     }
 }

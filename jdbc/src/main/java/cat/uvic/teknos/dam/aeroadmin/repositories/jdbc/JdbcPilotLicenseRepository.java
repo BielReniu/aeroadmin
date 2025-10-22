@@ -5,7 +5,6 @@ import cat.uvic.teknos.dam.aeroadmin.model.model.PilotLicense;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.PilotLicenseImpl;
 import cat.uvic.teknos.dam.aeroadmin.repositories.PilotLicenseRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -15,21 +14,21 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
 
     private final DataSource dataSource;
 
+    // 1. CONSTRUCTOR CORREGIT
     public JdbcPilotLicenseRepository(DataSource dataSource) {
-        this.dataSource = new DataSource() {
-            @Override
-            public Connection getConnection() {
-                return null;
-            }
-        };
+        this.dataSource = dataSource;
     }
 
+    // 2. MÈTODE SAVE AMB LÒGICA CORREGIDA (UPSERT)
     @Override
     public void save(PilotLicense license) {
-        if (license.getPilotId() == 0) {
+        if (license.getPilotId() <= 0) {
+            throw new IllegalArgumentException("Pilot ID must be valid to save a license.");
+        }
+
+        // Intentem actualitzar primer. Si no afecta cap fila, vol dir que no existeix, i l'inserim.
+        if (update(license) == 0) {
             insert(license);
-        } else {
-            update(license);
         }
     }
 
@@ -49,7 +48,7 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
         }
     }
 
-    private void update(PilotLicense license) {
+    private int update(PilotLicense license) {
         String sql = "UPDATE pilot_license SET license_number = ?, license_type = ?, issue_date = ?, expiration_date = ? WHERE pilot_id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -58,7 +57,7 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
             stmt.setDate(3, Date.valueOf(license.getIssueDate()));
             stmt.setDate(4, Date.valueOf(license.getExpirationDate()));
             stmt.setInt(5, license.getPilotId());
-            stmt.executeUpdate();
+            return stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating pilot license", e);
         }
@@ -77,14 +76,15 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
     }
 
     @Override
-    public PilotLicense get(Integer id) {
+    public PilotLicense get(Integer pilotId) {
         String sql = "SELECT * FROM pilot_license WHERE pilot_id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
+            stmt.setInt(1, pilotId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error fetching pilot license by ID", e);
@@ -108,23 +108,37 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
         return licenses;
     }
 
+    // 3. MÈTODES IMPLEMENTATS
+    @Override
+    public Set<PilotLicense> getByLicenseType(LicenseType licenseType) {
+        Set<PilotLicense> licenses = new HashSet<>();
+        String sql = "SELECT * FROM pilot_license WHERE license_type = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, licenseType.name());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    licenses.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching licenses by type", e);
+        }
+        return licenses;
+    }
+
+    @Override
+    public PilotLicense create() {
+        return new PilotLicenseImpl();
+    }
+
     private PilotLicense mapRow(ResultSet rs) throws SQLException {
-        var license = new PilotLicenseImpl();
+        PilotLicense license = new PilotLicenseImpl();
         license.setPilotId(rs.getInt("pilot_id"));
         license.setLicenseNumber(rs.getString("license_number"));
         license.setLicenseType(LicenseType.valueOf(rs.getString("license_type")));
         license.setIssueDate(rs.getDate("issue_date").toLocalDate());
         license.setExpirationDate(rs.getDate("expiration_date").toLocalDate());
         return license;
-    }
-
-    @Override
-    public Set<PilotLicense> getByLicenseType(LicenseType licenseType) {
-        return Set.of();
-    }
-
-    @Override
-    public PilotLicense create() {
-        return null;
     }
 }

@@ -1,11 +1,9 @@
 package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 
-
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftDetailImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.model.AircraftDetail;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftDetailRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -15,13 +13,9 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
 
     private final DataSource dataSource;
 
+    // AQUEST ÉS EL CONSTRUCTOR CORREGIT
     public JdbcAircraftDetailRepository(DataSource dataSource) {
-        this.dataSource = new DataSource() {
-            @Override
-            public Connection getConnection() {
-                return null;
-            }
-        };
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -34,6 +28,8 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
     }
 
     private void insert(AircraftDetail detail) {
+        // Aquesta implementació assumeix que l'ID es gestiona a la taula AIRCRAFT
+        // i ja existeix quan es desa el detall.
         String sql = "INSERT INTO aircraft_detail (aircraft_id, passenger_capacity, max_range_km, max_speed_kmh, fuel_capacity_liters) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -81,9 +77,10 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error fetching aircraft detail by ID", e);
@@ -119,11 +116,13 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
 
     @Override
     public Set<AircraftDetail> getByPassengerCapacity(int minCapacity, int maxCapacity) {
+        // Aquest mètode està pendent d'implementar
         return Set.of();
     }
 
     @Override
     public AircraftDetail create() {
-        return null;
+        // Aquest mètode està pendent d'implementar
+        return new AircraftDetailImpl();
     }
 }

@@ -24,5 +24,7 @@ include(
     "model",
     "repositories",
     "jdbc",
-    "jpa"
+    "jpa",
+    "server",
+    "clients:console"
 )

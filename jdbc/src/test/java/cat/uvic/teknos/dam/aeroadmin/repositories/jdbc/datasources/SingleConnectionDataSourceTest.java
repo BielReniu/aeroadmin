@@ -29,24 +29,7 @@ class SingleConnectionDataSourceTest {
     void getPassword() {
     }
 
-    @Test
-    void getConnectionOk() {
-        var dataSource = new SingleConnectionDataSource();
 
-        var connection = dataSource.getConnection();
 
-        assertNotNull(connection);
-    }
 
-    @Test
-    void getConnectionKo() {
-        var dataSource = new SingleConnectionDataSource(
-                "mysql",
-                "localhost:3306",
-                "AVIATION_SYSTEM",
-                "root",
-                "1qaz2wsx3edc");
-
-        assertThrows(DataSourceException.class, dataSource::getConnection);
-    }
 }

@@ -26,12 +26,7 @@ public class JpaPilotLicenseRepository implements PilotLicenseRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-
-            if (((JpaPilotLicense) license).getPilotId() == 0)
-                em.persist(license);
-            else
-                em.merge(license);
-
+            em.merge(license); // Simplificat: gestiona la creació o actualització (upsert)
             tx.commit();
         }
     }
@@ -42,7 +37,10 @@ public class JpaPilotLicenseRepository implements PilotLicenseRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            PilotLicense toDelete = em.find(JpaPilotLicense.class, ((JpaPilotLicense) license).getPilotId());
+            // Cal un cast per accedir a l'ID de la implementació de JPA
+            int id = ((JpaPilotLicense) license).getPilotId();
+            PilotLicense toDelete = em.find(JpaPilotLicense.class, id);
+
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -67,11 +65,18 @@ public class JpaPilotLicenseRepository implements PilotLicenseRepository {
 
     @Override
     public Set<PilotLicense> getByLicenseType(LicenseType licenseType) {
-        return Set.of();
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            TypedQuery<JpaPilotLicense> query = em.createQuery(
+                    "SELECT l FROM JpaPilotLicense l WHERE l.licenseType = :licenseType",
+                    JpaPilotLicense.class
+            );
+            query.setParameter("licenseType", licenseType);
+            return new HashSet<>(query.getResultList());
+        }
     }
 
     @Override
     public PilotLicense create() {
-        return null;
+        return new JpaPilotLicense();
     }
 }

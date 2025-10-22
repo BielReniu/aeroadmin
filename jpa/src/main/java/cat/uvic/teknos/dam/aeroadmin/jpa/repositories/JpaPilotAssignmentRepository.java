@@ -1,5 +1,6 @@
 package cat.uvic.teknos.dam.aeroadmin.jpa.repositories;
 
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaFlight;
 import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaPilotAssignment;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Flight;
 import cat.uvic.teknos.dam.aeroadmin.model.model.PilotAssignment;
@@ -26,12 +27,7 @@ public class JpaPilotAssignmentRepository implements PilotAssignmentRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-
-            if (((JpaPilotAssignment) assignment).getAssignmentId() == 0)
-                em.persist(assignment);
-            else
-                em.merge(assignment);
-
+            em.merge(assignment); // Simplificat: gestiona la creació i l'actualització
             tx.commit();
         }
     }
@@ -42,7 +38,10 @@ public class JpaPilotAssignmentRepository implements PilotAssignmentRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            PilotAssignment toDelete = em.find(JpaPilotAssignment.class, ((JpaPilotAssignment) assignment).getAssignmentId());
+            // Cal un cast per accedir a l'ID de la implementació de JPA
+            int id = ((JpaPilotAssignment) assignment).getAssignmentId();
+            PilotAssignment toDelete = em.find(JpaPilotAssignment.class, id);
+
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -67,11 +66,19 @@ public class JpaPilotAssignmentRepository implements PilotAssignmentRepository {
 
     @Override
     public Set<PilotAssignment> getByFlight(Flight flight) {
-        return Set.of();
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            TypedQuery<JpaPilotAssignment> query = em.createQuery(
+                    // JPQL permet comparar directament per l'entitat relacionada
+                    "SELECT a FROM JpaPilotAssignment a WHERE a.flight = :flight",
+                    JpaPilotAssignment.class
+            );
+            query.setParameter("flight", flight);
+            return new HashSet<>(query.getResultList());
+        }
     }
 
     @Override
     public PilotAssignment create() {
-        return null;
+        return new JpaPilotAssignment();
     }
 }

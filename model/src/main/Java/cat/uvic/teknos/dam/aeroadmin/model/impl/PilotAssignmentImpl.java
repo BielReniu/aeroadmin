@@ -15,6 +15,7 @@ public class PilotAssignmentImpl implements PilotAssignment {
     private AssignmentRole role;
     private boolean isLeadPilot;
     private BigDecimal assignedHours;
+    private LocalDateTime assignedAt; // Camp afegit
 
     @Override
     public int getAssignmentId() {
@@ -76,8 +77,14 @@ public class PilotAssignmentImpl implements PilotAssignment {
         this.assignedHours = assignedHours;
     }
 
+    // Mètodes per a la nova propietat
     @Override
-    public void setAssignedAt(LocalDateTime parse) {
+    public LocalDateTime getAssignedAt() {
+        return assignedAt;
+    }
 
+    @Override
+    public void setAssignedAt(LocalDateTime assignedAt) {
+        this.assignedAt = assignedAt;
     }
 }

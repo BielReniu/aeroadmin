@@ -25,12 +25,7 @@ public class JpaFlightRepository implements FlightRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-
-            if (((JpaFlight) flight).getFlightId() == 0)
-                em.persist(flight);
-            else
-                em.merge(flight);
-
+            em.merge(flight); // Simplificat: gestiona la creació i l'actualització
             tx.commit();
         }
     }
@@ -41,7 +36,10 @@ public class JpaFlightRepository implements FlightRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            Flight toDelete = em.find(JpaFlight.class, ((JpaFlight) flight).getFlightId());
+            // Cal un cast per accedir a l'ID de la implementació de JPA
+            int id = ((JpaFlight) flight).getFlightId();
+            Flight toDelete = em.find(JpaFlight.class, id);
+
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -66,11 +64,18 @@ public class JpaFlightRepository implements FlightRepository {
 
     @Override
     public Set<Flight> getByDepartureAirport(String departureAirport) {
-        return Set.of();
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            TypedQuery<JpaFlight> query = em.createQuery(
+                    "SELECT f FROM JpaFlight f WHERE f.departureAirport = :airport",
+                    JpaFlight.class
+            );
+            query.setParameter("airport", departureAirport);
+            return new HashSet<>(query.getResultList());
+        }
     }
 
     @Override
     public Flight create() {
-        return null;
+        return new JpaFlight();
     }
 }

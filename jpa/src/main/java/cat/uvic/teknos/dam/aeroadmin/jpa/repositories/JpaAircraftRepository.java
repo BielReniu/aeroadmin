@@ -25,12 +25,7 @@ public class JpaAircraftRepository implements AircraftRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-
-            if (((JpaAircraft) aircraft).getAircraftId() == 0)
-                em.persist(aircraft);
-            else
-                em.merge(aircraft);
-
+            em.merge(aircraft); // Simplificat: s'encarrega de crear o actualitzar
             tx.commit();
         }
     }
@@ -41,7 +36,10 @@ public class JpaAircraftRepository implements AircraftRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            Aircraft toDelete = em.find(JpaAircraft.class, ((JpaAircraft) aircraft).getAircraftId());
+            // Cal un cast per accedir a l'ID de la implementació de JPA
+            int id = ((JpaAircraft) aircraft).getAircraftId();
+            Aircraft toDelete = em.find(JpaAircraft.class, id);
+
             if (toDelete != null)
                 em.remove(toDelete);
 
@@ -66,11 +64,18 @@ public class JpaAircraftRepository implements AircraftRepository {
 
     @Override
     public Set<Aircraft> getByManufacturer(String manufacturer) {
-        return Set.of();
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+            TypedQuery<JpaAircraft> query = em.createQuery(
+                    "SELECT a FROM JpaAircraft a WHERE a.manufacturer = :manufacturer",
+                    JpaAircraft.class
+            );
+            query.setParameter("manufacturer", manufacturer);
+            return new HashSet<>(query.getResultList());
+        }
     }
 
     @Override
     public Aircraft create() {
-        return null;
+        return new JpaAircraft();
     }
 }

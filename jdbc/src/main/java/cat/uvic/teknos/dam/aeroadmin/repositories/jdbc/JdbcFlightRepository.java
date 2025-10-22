@@ -1,13 +1,14 @@
 package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 
 import cat.uvic.teknos.dam.aeroadmin.model.enums.FlightStatus;
+import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftImpl;
+import cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Flight;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.FlightImpl;
 import cat.uvic.teknos.dam.aeroadmin.repositories.FlightRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -17,13 +18,9 @@ public class JdbcFlightRepository implements FlightRepository {
 
     private final DataSource dataSource;
 
+    // 1. CONSTRUCTOR CORREGIT
     public JdbcFlightRepository(DataSource dataSource) {
-        this.dataSource = new DataSource() {
-            @Override
-            public Connection getConnection() {
-                return null;
-            }
-        };
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -91,15 +88,24 @@ public class JdbcFlightRepository implements FlightRepository {
         }
     }
 
+    // 2. Base de la consulta optimitzada amb JOINs
+    private static final String QUERY_BASE = "SELECT f.*, " +
+            "al.airline_name, al.iata_code, al.icao_code, " + // Camps de Airline
+            "ac.model, ac.manufacturer, ac.registration_number " + // Camps de Aircraft
+            "FROM flight f " +
+            "LEFT JOIN airline al ON f.airline_id = al.airline_id " +
+            "LEFT JOIN aircraft ac ON f.aircraft_id = ac.aircraft_id ";
+
     @Override
     public Flight get(Integer id) {
-        String sql = "SELECT * FROM flight WHERE flight_id = ?";
+        String sql = QUERY_BASE + "WHERE f.flight_id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error fetching flight by ID", e);
@@ -110,10 +116,9 @@ public class JdbcFlightRepository implements FlightRepository {
     @Override
     public Set<Flight> getAll() {
         Set<Flight> flights = new HashSet<>();
-        String sql = "SELECT * FROM flight";
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(QUERY_BASE)) {
             while (rs.next()) {
                 flights.add(mapRow(rs));
             }
@@ -123,8 +128,33 @@ public class JdbcFlightRepository implements FlightRepository {
         return flights;
     }
 
+    // 3. MÈTODE IMPLEMENTAT
+    @Override
+    public Set<Flight> getByDepartureAirport(String departureAirport) {
+        Set<Flight> flights = new HashSet<>();
+        String sql = QUERY_BASE + "WHERE f.departure_airport = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, departureAirport);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    flights.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching flights by departure airport", e);
+        }
+        return flights;
+    }
+
+    // 3. MÈTODE IMPLEMENTAT
+    @Override
+    public Flight create() {
+        return new FlightImpl();
+    }
+
     private Flight mapRow(ResultSet rs) throws SQLException {
-        var flight = new FlightImpl();
+        Flight flight = new FlightImpl();
         flight.setFlightId(rs.getInt("flight_id"));
         flight.setFlightNumber(rs.getString("flight_number"));
         flight.setDepartureAirport(rs.getString("departure_airport"));
@@ -133,24 +163,28 @@ public class JdbcFlightRepository implements FlightRepository {
         flight.setScheduledArrival(rs.getTimestamp("scheduled_arrival").toLocalDateTime());
         flight.setStatus(FlightStatus.valueOf(rs.getString("status")));
 
+        // Mapejar Airline des del JOIN
         int airlineId = rs.getInt("airline_id");
-        Airline airline = new JdbcAirlineRepository(dataSource).get(airlineId);
-        flight.setAirline(airline);
+        if (!rs.wasNull()) {
+            Airline airline = new AirlineImpl();
+            airline.setAirlineId(airlineId);
+            airline.setAirlineName(rs.getString("airline_name"));
+            airline.setIataCode(rs.getString("iata_code"));
+            airline.setIcaoCode(rs.getString("icao_code"));
+            flight.setAirline(airline);
+        }
 
+        // Mapejar Aircraft des del JOIN
         int aircraftId = rs.getInt("aircraft_id");
-        Aircraft aircraft = new JdbcAircraftRepository(dataSource).get(aircraftId);
-        flight.setAircraft(aircraft);
+        if (!rs.wasNull()) {
+            Aircraft aircraft = new AircraftImpl();
+            aircraft.setAircraftId(aircraftId);
+            aircraft.setModel(rs.getString("model"));
+            aircraft.setManufacturer(rs.getString("manufacturer"));
+            aircraft.setRegistrationNumber(rs.getString("registration_number"));
+            flight.setAircraft(aircraft);
+        }
 
         return flight;
-    }
-
-    @Override
-    public Set<Flight> getByDepartureAirport(String departureAirport) {
-        return Set.of();
-    }
-
-    @Override
-    public Flight create() {
-        return null;
     }
 }

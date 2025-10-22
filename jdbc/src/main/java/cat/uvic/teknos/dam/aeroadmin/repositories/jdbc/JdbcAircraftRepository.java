@@ -1,11 +1,11 @@
 package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc;
 
+import cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Aircraft;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AircraftImpl;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AircraftRepository;
 import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.DataSource;
-import cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.datasources.SingleConnectionDataSource;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -15,13 +15,9 @@ public class JdbcAircraftRepository implements AircraftRepository {
 
     private final DataSource dataSource;
 
+    // 1. CONSTRUCTOR CORREGIT
     public JdbcAircraftRepository(DataSource dataSource) {
-        this.dataSource = new DataSource() {
-            @Override
-            public Connection getConnection() {
-                return null;
-            }
-        };
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -41,7 +37,13 @@ public class JdbcAircraftRepository implements AircraftRepository {
             stmt.setString(2, aircraft.getManufacturer());
             stmt.setString(3, aircraft.getRegistrationNumber());
             stmt.setInt(4, aircraft.getProductionYear());
-            stmt.setInt(5, aircraft.getAirline().getAirlineId());
+
+            // Comprova que l'aerolínia no sigui nul·la abans de desar
+            if (aircraft.getAirline() != null) {
+                stmt.setInt(5, aircraft.getAirline().getAirlineId());
+            } else {
+                stmt.setNull(5, Types.INTEGER);
+            }
 
             stmt.executeUpdate();
 
@@ -63,7 +65,11 @@ public class JdbcAircraftRepository implements AircraftRepository {
             stmt.setString(2, aircraft.getManufacturer());
             stmt.setString(3, aircraft.getRegistrationNumber());
             stmt.setInt(4, aircraft.getProductionYear());
-            stmt.setInt(5, aircraft.getAirline().getAirlineId());
+            if (aircraft.getAirline() != null) {
+                stmt.setInt(5, aircraft.getAirline().getAirlineId());
+            } else {
+                stmt.setNull(5, Types.INTEGER);
+            }
             stmt.setInt(6, aircraft.getAircraftId());
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -85,13 +91,16 @@ public class JdbcAircraftRepository implements AircraftRepository {
 
     @Override
     public Aircraft get(Integer id) {
-        String sql = "SELECT * FROM aircraft WHERE aircraft_id = ?";
+        // 2. CONSULTA OPTIMITZADA AMB JOIN
+        String sql = "SELECT a.*, al.airline_name, al.iata_code, al.icao_code FROM aircraft a " +
+                "LEFT JOIN airline al ON a.airline_id = al.airline_id WHERE a.aircraft_id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapRow(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error fetching aircraft by ID", e);
@@ -102,7 +111,9 @@ public class JdbcAircraftRepository implements AircraftRepository {
     @Override
     public Set<Aircraft> getAll() {
         Set<Aircraft> aircrafts = new HashSet<>();
-        String sql = "SELECT * FROM aircraft";
+        // 2. CONSULTA OPTIMITZADA AMB JOIN
+        String sql = "SELECT a.*, al.airline_name, al.iata_code, al.icao_code FROM aircraft a " +
+                "LEFT JOIN airline al ON a.airline_id = al.airline_id";
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -115,8 +126,34 @@ public class JdbcAircraftRepository implements AircraftRepository {
         return aircrafts;
     }
 
+    // 3. MÈTODE getByManufacturer IMPLEMENTAT
+    @Override
+    public Set<Aircraft> getByManufacturer(String manufacturer) {
+        Set<Aircraft> aircrafts = new HashSet<>();
+        String sql = "SELECT a.*, al.airline_name, al.iata_code, al.icao_code FROM aircraft a " +
+                "LEFT JOIN airline al ON a.airline_id = al.airline_id WHERE a.manufacturer = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, manufacturer);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    aircrafts.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching aircraft by manufacturer", e);
+        }
+        return aircrafts;
+    }
+
+    // 3. MÈTODE create IMPLEMENTAT
+    @Override
+    public Aircraft create() {
+        return new AircraftImpl();
+    }
+
     private Aircraft mapRow(ResultSet rs) throws SQLException {
-        var aircraft = new AircraftImpl();
+        Aircraft aircraft = new AircraftImpl();
         aircraft.setAircraftId(rs.getInt("aircraft_id"));
         aircraft.setModel(rs.getString("model"));
         aircraft.setManufacturer(rs.getString("manufacturer"));
@@ -124,19 +161,16 @@ public class JdbcAircraftRepository implements AircraftRepository {
         aircraft.setProductionYear(rs.getInt("production_year"));
 
         int airlineId = rs.getInt("airline_id");
-        Airline airline = new JdbcAirlineRepository(dataSource).get(airlineId);
-        aircraft.setAirline(airline);
+        // Comprovem si l'airline_id és null a la base de dades
+        if (!rs.wasNull()) {
+            Airline airline = new AirlineImpl();
+            airline.setAirlineId(airlineId);
+            airline.setAirlineName(rs.getString("airline_name"));
+            airline.setIataCode(rs.getString("iata_code"));
+            airline.setIcaoCode(rs.getString("icao_code"));
+            aircraft.setAirline(airline);
+        }
 
         return aircraft;
-    }
-
-    @Override
-    public Set<Aircraft> getByManufacturer(String manufacturer) {
-        return Set.of();
-    }
-
-    @Override
-    public Aircraft create() {
-        return null;
     }
 }

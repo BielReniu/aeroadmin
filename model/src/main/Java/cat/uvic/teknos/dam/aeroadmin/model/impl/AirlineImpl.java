@@ -4,7 +4,7 @@ import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 
 public class AirlineImpl implements Airline {
     private int airlineId;
-    private String name;
+    private String airlineName; // Canviat de "name" a "airlineName"
     private String iataCode;
     private String icaoCode;
     private String country;
@@ -21,14 +21,15 @@ public class AirlineImpl implements Airline {
         this.airlineId = airlineId;
     }
 
+    // Mètodes canviats de "getName" a "getAirlineName"
     @Override
-    public String getName() {
-        return name;
+    public String getAirlineName() {
+        return airlineName;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setAirlineName(String airlineName) {
+        this.airlineName = airlineName;
     }
 
     @Override
@@ -81,8 +82,5 @@ public class AirlineImpl implements Airline {
         this.website = website;
     }
 
-    @Override
-    public void setCode(String ib) {
-
-    }
+    // El mètode setCode s'ha eliminat
 }
