@@ -2,10 +2,12 @@ package cat.uvic.teknos.dam.aeroadmin.server.exceptions;
 
 public class NotFoundException extends HttpException {
     public NotFoundException() {
-        super(404, "Resource not found");
+        // Cridem al nou constructor de HttpException
+        super(404, "Not Found", "Resource not found");
     }
 
-    public NotFoundException(String message) {
-        super(404, message);
+    public NotFoundException(String detailMessage) {
+        // Cridem al nou constructor de HttpException
+        super(404, "Not Found", detailMessage);
     }
 }
