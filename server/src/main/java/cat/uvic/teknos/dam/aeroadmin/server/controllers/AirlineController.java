@@ -1,6 +1,7 @@
 package cat.uvic.teknos.dam.aeroadmin.server.controllers;
 
-import cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl; // Important: utilitza la implementació
+// Importa l'entitat JPA
+import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAirline;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AirlineRepository;
 import cat.uvic.teknos.dam.aeroadmin.server.exceptions.BadRequestException;
@@ -19,66 +20,53 @@ public class AirlineController {
 
     public AirlineController(AirlineRepository repository) {
         this.repository = repository;
-        this.gson = new Gson(); // Instanciem Gson aquí
+        this.gson = new Gson();
     }
 
-    /**
-     * GET /airlines
-     * Obté totes les aerolínies i les retorna com una cadena de text JSON.
-     */
+    /** GET /airlines */
     public String getAllAirlines() {
         Set<Airline> airlines = repository.getAll();
         return gson.toJson(airlines);
     }
 
-    /**
-     * GET /airlines/{id}
-     * Obté una aerolínia específica pel seu ID.
-     */
+    /** GET /airlines/{id} */
     public String getAirlineById(String id) {
         try {
             int airlineId = Integer.parseInt(id);
             Airline airline = repository.get(airlineId);
             if (airline == null) {
-                // Si no es troba, llencem una excepció 404
                 throw new NotFoundException("Airline with ID " + airlineId + " not found.");
             }
             return gson.toJson(airline);
         } catch (NumberFormatException e) {
-            // Si l'ID no és un número, llencem una excepció 400
             throw new BadRequestException("Invalid ID format. Must be an integer.");
         }
     }
 
-    /**
-     * POST /airlines
-     * Crea una nova aerolínia a partir del cos de la petició (JSON).
-     */
+    /** POST /airlines */
     public String createAirline(RawHttpRequest request) throws IOException {
-        // Obtenim el cos de la petició (el JSON)
         String jsonBody = request.getBody()
                 .orElseThrow(() -> new BadRequestException("Request body is missing."))
                 .decodeBodyToString(StandardCharsets.UTF_8);
 
-        // Usem Gson per convertir el JSON a un objecte Airline
-        // Important utilitzar AirlineImpl.class per a la deserialització
-        Airline newAirline = gson.fromJson(jsonBody, AirlineImpl.class);
+        // --- CORRECCIÓ ---
+        // Deserialitza directament a l'entitat JPA
+        JpaAirline newAirline = gson.fromJson(jsonBody, JpaAirline.class);
+        // --- FI CORRECCIÓ ---
+
         if (newAirline == null) {
             throw new BadRequestException("Invalid JSON format for Airline.");
         }
 
-        // Assegurem que l'ID sigui 0 per a una nova inserció
+        // Assegura que l'ID sigui 0 per a una nova inserció
         newAirline.setAirlineId(0);
 
-        repository.save(newAirline);
-        // Retornem l'objecte creat (que ara ja inclou el nou ID)
+        repository.save(newAirline); // Ara passem el tipus correcte (JpaAirline)
+
         return gson.toJson(newAirline);
     }
 
-    /**
-     * PUT /airlines/{id}
-     * Actualitza una aerolínia existent.
-     */
+    /** PUT /airlines/{id} */
     public String updateAirline(String id, RawHttpRequest request) throws IOException {
         int airlineId;
         try {
@@ -87,39 +75,44 @@ public class AirlineController {
             throw new BadRequestException("Invalid ID format. Must be an integer.");
         }
 
-        // Comprovem si l'aerolínia que es vol actualitzar existeix
+        // Recuperem l'entitat existent (hauria de ser una instància de JpaAirline si el repo és JPA)
         Airline existingAirline = repository.get(airlineId);
         if (existingAirline == null) {
             throw new NotFoundException("Airline with ID " + airlineId + " not found.");
         }
+        // Assegurem que treballem amb l'objecte JPA
+        if (!(existingAirline instanceof JpaAirline)) {
+            throw new RuntimeException("Repository did not return a JpaAirline instance for update."); // Error intern
+        }
+        JpaAirline existingJpaAirline = (JpaAirline) existingAirline;
 
-        // Obtenim el JSON amb les noves dades
+
         String jsonBody = request.getBody()
                 .orElseThrow(() -> new BadRequestException("Request body is missing."))
                 .decodeBodyToString(StandardCharsets.UTF_8);
 
-        Airline updatedInfo = gson.fromJson(jsonBody, AirlineImpl.class);
+        // --- CORRECCIÓ ---
+        // Deserialitza la informació actualitzada a l'entitat JPA
+        JpaAirline updatedInfo = gson.fromJson(jsonBody, JpaAirline.class);
+        // --- FI CORRECCIÓ ---
+
         if (updatedInfo == null) {
             throw new BadRequestException("Invalid JSON format for Airline.");
         }
 
-        // Actualitzem les dades de l'objecte que ja teníem
-        existingAirline.setAirlineName(updatedInfo.getAirlineName());
-        existingAirline.setIataCode(updatedInfo.getIataCode());
-        existingAirline.setIcaoCode(updatedInfo.getIcaoCode());
-        existingAirline.setCountry(updatedInfo.getCountry());
-        existingAirline.setFoundationYear(updatedInfo.getFoundationYear());
-        existingAirline.setWebsite(updatedInfo.getWebsite());
+        // Actualitza l'objecte entitat existent
+        existingJpaAirline.setAirlineName(updatedInfo.getAirlineName());
+        existingJpaAirline.setIataCode(updatedInfo.getIataCode());
+        existingJpaAirline.setIcaoCode(updatedInfo.getIcaoCode());
+        existingJpaAirline.setCountry(updatedInfo.getCountry());
+        existingJpaAirline.setFoundationYear(updatedInfo.getFoundationYear());
+        existingJpaAirline.setWebsite(updatedInfo.getWebsite());
 
-        // Desem els canvis
-        repository.save(existingAirline);
-        return gson.toJson(existingAirline);
+        repository.save(existingJpaAirline); // Passa l'entitat JpaAirline actualitzada
+        return gson.toJson(existingJpaAirline);
     }
 
-    /**
-     * DELETE /airlines/{id}
-     * Esborra una aerolínia pel seu ID.
-     */
+    /** DELETE /airlines/{id} */
     public void deleteAirline(String id) {
         int airlineId;
         try {
@@ -133,7 +126,6 @@ public class AirlineController {
             throw new NotFoundException("Airline with ID " + airlineId + " not found.");
         }
 
-        // Esborrem l'aerolínia
         repository.delete(airline);
         // No cal retornar res (el router enviarà un 204 No Content)
     }
