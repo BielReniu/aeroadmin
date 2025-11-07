@@ -140,15 +140,16 @@ aeroadmin/
 
 | Versió | Descripció |
 |---------|-------------|
-| **0.1.0** | Importació inicial |
-| **0.1.1** | Afegit README |
-| **0.2.0** | Afegit mòdul `model` |
-| **0.3.0** | Creat mòdul `repositories` |
-| **0.4.0** | Implementació parcial JDBC |
-| **1.0.0** | Implementació completa JDBC + tests |
-| **1.1.0** | Implementació completa JPA + tests |
-| **1.1.1** | Correccions finals JPA |
-| **1.2.0** | Afegida arquitectura Client/Servidor (`server` i `clients/console`) |
+| 0.1.0 | Importació inicial |
+| 0.1.1 | Afegit README |
+| 0.2.0 | Afegit mòdul `model` |
+| 0.3.0 | Creat mòdul `repositories` |
+| 0.4.0 | Implementació parcial JDBC |
+| 1.0.0 | Implementació completa JDBC + tests |
+| 1.1.0 | Implementació completa JPA + tests |
+| 1.1.1 | Correccions finals JPA |
+| 1.2.0 | Afegida arquitectura Client/Servidor (`server` i `clients/console`) |
+| **2.1.0** | **Servidor concurrent, fil dimoni i gestió d'inactivitat (Tasca 2.1)** |
 
 ---
 
