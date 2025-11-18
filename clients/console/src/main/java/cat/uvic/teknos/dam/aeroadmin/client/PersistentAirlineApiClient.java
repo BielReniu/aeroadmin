@@ -2,6 +2,7 @@ package cat.uvic.teknos.dam.aeroadmin.client;
 
 import cat.uvic.teknos.dam.aeroadmin.model.impl.AirlineImpl;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
+import cat.uvic.teknos.dam.aeroadmin.utilities.security.CryptoUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import rawhttp.core.RawHttp;
@@ -21,9 +22,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Un client API que manté una connexió persistent i gestiona la
- * inactivitat (Req 3).
- * Aquesta classe substitueix AirlineApiClient.
+ * An API client that maintains a persistent connection and handles
+ * inactivity.
+ * This class replaces AirlineApiClient.
  */
 public class PersistentAirlineApiClient {
 
@@ -33,50 +34,53 @@ public class PersistentAirlineApiClient {
     private final RawHttp http;
     private final Gson gson;
 
-    // REQ 3: Temporitzador d'inactivitat
+    // Custom header for message hash
+    private static final String HASH_HEADER = "X-Message-Hash";
+
+    // Inactivity timer
     private Timer inactivityTimer;
-    // 2 minuts en mil·lisegons
+    // 2 minutes in milliseconds
     private final long INACTIVITY_TIMEOUT_MS = 2 * 60 * 1000;
 
     public PersistentAirlineApiClient(String baseUrl) {
         URI uri = URI.create(baseUrl);
         this.host = uri.getHost();
-        // Gestiona port per defecte si no s'especifica
+        // Handle default port if not specified
         this.port = (uri.getPort() == -1) ? 80 : uri.getPort();
         this.http = new RawHttp();
         this.gson = new Gson();
     }
 
     /**
-     * Obre la connexió persistent amb el servidor.
+     * Opens the persistent connection to the server.
      */
     public void connect() throws IOException {
         if (socket != null && !socket.isClosed()) {
-            return; // Ja està connectat
+            return; // Already connected
         }
         this.socket = new Socket(host, port);
-        System.out.println("Client connectat al servidor a " + host + ":" + port);
-        // Iniciem el temporitzador d'inactivitat
+        System.out.println("Client connected to server at " + host + ":" + port);
+        // Start the inactivity timer
         resetInactivityTimer();
     }
 
     /**
-     * Envia el missatge de desconnexió (Req 3)
+     * Sends the disconnect message.
      */
     public void disconnect() throws IOException {
         if (socket == null || socket.isClosed()) {
             return;
         }
 
-        System.out.println("Enviant sol·licitud de desconnexió...");
-        // Aturem el temporitzador per evitar que torni a saltar
+        System.out.println("Sending disconnect request...");
+        // Stop the timer to prevent it from firing again
         if (inactivityTimer != null) {
             inactivityTimer.cancel();
             inactivityTimer = null;
         }
 
         try {
-            // 1. Enviar missatge "disconnect"
+            // 1. Send "disconnect" message
             RawHttpRequest request = http.parseRequest(
                     "GET /disconnect HTTP/1.1\r\n" +
                             "Host: " + host + "\r\n" +
@@ -84,76 +88,99 @@ public class PersistentAirlineApiClient {
             );
             request.writeTo(socket.getOutputStream());
 
-            // 2. Esperar ACK del servidor
+            // 2. Wait for server ACK
             RawHttpResponse<?> response = http.parseResponse(socket.getInputStream()).eagerly();
             if (response.getStatusCode() == 200) {
-                System.out.println("ACK rebut del servidor.");
+                System.out.println("ACK received from server.");
             } else {
-                System.err.println("Error rebent ACK: " + response.getStartLine());
+                System.err.println("Error receiving ACK: " + response.getStartLine());
             }
 
-            // 3. Esperar 1 segon (Req 3)
+            // 3. Wait 1 second
             Thread.sleep(1000);
 
         } catch (Exception e) {
-            // Si el servidor ja ha tancat el socket, pot donar error, ho ignorem
+            // If server already closed the socket, this might fail, ignore
             if (!(e instanceof java.net.SocketException)) {
-                System.err.println("Error durant la desconnexió: " + e.getMessage());
+                System.err.println("Error during disconnect: " + e.getMessage());
             }
         } finally {
-            // 4. Tancar el socket
+            // 4. Close the socket
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-            System.out.println("Connexió tancada.");
+            System.out.println("Connection closed.");
         }
     }
 
     /**
-     * Reinicia el comptador d'inactivitat. S'ha de cridar CADA VEGADA
-     * que el client fa una acció (abans d'enviar una petició).
+     * Resets the inactivity timer. Must be called EVERY TIME
+     * the client performs an action (before sending a request).
      */
     private void resetInactivityTimer() {
         if (inactivityTimer != null) {
             inactivityTimer.cancel();
         }
-        inactivityTimer = new Timer(true); // true per a fil dimoni
+        inactivityTimer = new Timer(true); // true for daemon thread
         inactivityTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                // Si salta el timer, iniciem el procés de desconnexió
-                System.out.println("\n[TIMER] 2 minuts d'inactivitat detectats.");
+                // If the timer fires, start the disconnect process
+                System.out.println("\n[TIMER] 2 minutes of inactivity detected.");
                 try {
                     disconnect();
                 } catch (IOException e) {
-                    System.err.println("Error en desconnectar per inactivitat: " + e.getMessage());
+                    System.err.println("Error disconnecting due to inactivity: " + e.getMessage());
                 }
             }
         }, INACTIVITY_TIMEOUT_MS);
     }
 
     /**
-     * Mètode privat per enviar peticions i rebre respostes
-     * usant la connexió persistent.
+     * Private method to send requests and receive responses
+     * using the persistent connection.
+     * <p>
+     * Modified: Validates the hash of incoming responses.
      */
     private RawHttpResponse<?> sendPersistentRequest(RawHttpRequest request) throws IOException {
         if (socket == null || socket.isClosed()) {
-            // Si el timer ha tancat el socket, intentem reconnectar
-            System.out.println("Connexió tancada, intentant reconnectar...");
+            // If the timer closed the socket, try to reconnect
+            System.out.println("Connection closed, attempting reconnect...");
             connect();
             if (socket == null || socket.isClosed()) {
-                throw new IOException("El client no està connectat. No s'ha pogut reconnectar.");
+                throw new IOException("Client is not connected. Failed to reconnect.");
             }
         }
 
-        // REQ 3: Cada petició reinicia el timer
+        // Each request resets the timer
         resetInactivityTimer();
 
-        System.out.println("Enviant petició: " + request.getStartLine());
+        System.out.println("Sending request: " + request.getStartLine());
         request.writeTo(socket.getOutputStream());
 
+        // Read the response and load it into memory (eagerly)
         RawHttpResponse<?> response = http.parseResponse(socket.getInputStream()).eagerly();
-        System.out.println("Resposta rebuda: " + response.getStartLine());
+        System.out.println("Response received: " + response.getStartLine());
+
+        // --- HASH VALIDATION ---
+        var bodyOpt = response.getBody();
+        if (bodyOpt.isPresent()) {
+            // If body is present, hash MUST be present
+            String expectedHash = response.getHeaders().getFirst(HASH_HEADER)
+                    .orElseThrow(() -> new IOException("Server response is missing " + HASH_HEADER + " header."));
+
+            // The correct method to eagerly read bytes from a BodyReader is decodeBody()
+            byte[] bodyBytes = bodyOpt.get().decodeBody();
+
+            String actualHash = CryptoUtils.hash(bodyBytes);
+
+            if (!actualHash.equals(expectedHash)) {
+                throw new IOException("Response hash mismatch. Data integrity compromised.");
+            }
+            System.out.println("Response hash verification: OK");
+        }
+        // --- END HASH VALIDATION ---
+
 
         if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
             String errorBody = response.getBody().map(b -> {
@@ -161,13 +188,13 @@ public class PersistentAirlineApiClient {
                     return b.decodeBodyToString(StandardCharsets.UTF_8);
                 } catch (IOException e) { return "Could not decode error body."; }
             }).orElse("No error body.");
-            throw new IOException("Error del servidor: " + response.getStatusCode() + " " + response.getStartLine().getReason() + " - " + errorBody);
+            throw new IOException("Server error: " + response.getStatusCode() + " " + response.getStartLine().getReason() + " - " + errorBody);
         }
         return response;
     }
 
-    // --- MÈTODES API (ARA USEN LA CONNEXIÓ PERSISTENT) ---
-    // Afegeix "Connection: keep-alive" a totes les peticions
+    // --- API METHODS (NOW USING PERSISTENT CONNECTION) ---
+    // Added "Connection: keep-alive" to all requests
 
     public Set<Airline> getAllAirlines() throws IOException {
         RawHttpRequest request = http.parseRequest(
@@ -194,10 +221,17 @@ public class PersistentAirlineApiClient {
         return gson.fromJson(jsonBody, AirlineImpl.class);
     }
 
+    /**
+     * Modified: Adds X-Message-Hash header
+     */
     public Airline createAirline(Airline airline) throws IOException {
         String jsonBody = gson.toJson(airline);
         byte[] bodyBytes = jsonBody.getBytes(StandardCharsets.UTF_8);
         StringBody body = new StringBody(jsonBody, "application/json; charset=utf-8");
+
+        // --- ADDED ---
+        String hash = CryptoUtils.hash(bodyBytes);
+        // --- END ADDED ---
 
         RawHttpRequest request = http.parseRequest(
                 "POST /airlines\r\n" +
@@ -205,7 +239,8 @@ public class PersistentAirlineApiClient {
                         "Content-Type: application/json; charset=utf-8\r\n" +
                         "Content-Length: " + bodyBytes.length + "\r\n" +
                         "Accept: application/json\r\n" +
-                        "Connection: keep-alive\r\n"
+                        "Connection: keep-alive\r\n" +
+                        HASH_HEADER + ": " + hash + "\r\n" // <-- AQUESTA ÉS LA LÍNIA CORRECTA
         ).withBody(body);
 
         RawHttpResponse<?> response = sendPersistentRequest(request);
@@ -213,10 +248,17 @@ public class PersistentAirlineApiClient {
         return gson.fromJson(responseJson, AirlineImpl.class);
     }
 
+    /**
+     * Modified: Adds X-Message-Hash header
+     */
     public Airline updateAirline(Airline airline) throws IOException {
         String jsonBody = gson.toJson(airline);
         byte[] bodyBytes = jsonBody.getBytes(StandardCharsets.UTF_8);
         StringBody body = new StringBody(jsonBody, "application/json; charset=utf-8");
+
+        // --- ADDED ---
+        String hash = CryptoUtils.hash(bodyBytes);
+        // --- END ADDED ---
 
         RawHttpRequest request = http.parseRequest(
                 "PUT /airlines/" + airline.getAirlineId() + "\r\n" +
@@ -224,7 +266,8 @@ public class PersistentAirlineApiClient {
                         "Content-Type: application/json; charset=utf-8\r\n" +
                         "Content-Length: " + bodyBytes.length + "\r\n" +
                         "Accept: application/json\r\n" +
-                        "Connection: keep-alive\r\n"
+                        "Connection: keep-alive\r\n" +
+                        HASH_HEADER + ": " + hash + "\r\n" // <-- AQUESTA ÉS LA LÍNIA CORRECTA
         ).withBody(body);
 
         RawHttpResponse<?> response = sendPersistentRequest(request);

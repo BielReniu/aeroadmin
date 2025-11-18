@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":model"))
+    implementation(project(":utilities"))
     implementation("com.github.freva:ascii-table:1.8.0")
 
     // AQUESTA ÉS LA DEPENDÈNCIA CORRECTA DE RAWHTTP AMB LA VERSIÓ

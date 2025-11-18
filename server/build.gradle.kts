@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":model"))
     implementation(project(":repositories"))
     implementation(project(":jpa"))
+    implementation(project(":utilities"))
 
     implementation("com.mysql:mysql-connector-j:9.3.0")
     implementation("com.athaydes.rawhttp:rawhttp-core:2.6.0")

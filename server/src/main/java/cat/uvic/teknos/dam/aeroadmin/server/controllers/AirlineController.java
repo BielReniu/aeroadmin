@@ -4,6 +4,7 @@ package cat.uvic.teknos.dam.aeroadmin.server.controllers;
 import cat.uvic.teknos.dam.aeroadmin.jpa.model.JpaAirline;
 import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 import cat.uvic.teknos.dam.aeroadmin.repositories.AirlineRepository;
+import cat.uvic.teknos.dam.aeroadmin.utilities.security.CryptoUtils;
 import cat.uvic.teknos.dam.aeroadmin.server.exceptions.BadRequestException;
 import cat.uvic.teknos.dam.aeroadmin.server.exceptions.NotFoundException;
 import com.google.gson.Gson;
@@ -17,6 +18,9 @@ public class AirlineController {
 
     private final AirlineRepository repository;
     private final Gson gson;
+
+    // Custom header for message hash
+    private static final String HASH_HEADER = "X-Message-Hash";
 
     public AirlineController(AirlineRepository repository) {
         this.repository = repository;
@@ -43,30 +47,62 @@ public class AirlineController {
         }
     }
 
-    /** POST /airlines */
-    public String createAirline(RawHttpRequest request) throws IOException {
-        String jsonBody = request.getBody()
-                .orElseThrow(() -> new BadRequestException("Request body is missing."))
-                .decodeBodyToString(StandardCharsets.UTF_8);
+    /**
+     * Helper method to validate the hash of an incoming request.
+     *
+     * @param request The incoming request.
+     * @return The raw byte[] of the body if the hash is valid.
+     * @throws IOException         if the body cannot be read.
+     * @throws BadRequestException if the hash header is missing or the hash does not match.
+     */
+    private byte[] validateAndGetBody(RawHttpRequest request) throws IOException {
+        String expectedHash = request.getHeaders().getFirst(HASH_HEADER)
+                .orElseThrow(() -> new BadRequestException("Missing " + HASH_HEADER + " header."));
 
-        // --- CORRECCIÓ ---
-        // Deserialitza directament a l'entitat JPA
+        // --- CORRECTION ---
+        // The correct method to eagerly read bytes from a BodyReader is decodeBody()
+        byte[] bodyBytes = request.getBody()
+                .orElseThrow(() -> new BadRequestException("Request body is missing."))
+                .decodeBody(); // <-- Changed from .asBytes()
+        // --- END CORRECTION ---
+
+        String actualHash = CryptoUtils.hash(bodyBytes);
+
+        if (!actualHash.equals(expectedHash)) {
+            throw new BadRequestException("Hash mismatch. Message integrity compromised.");
+        }
+
+        return bodyBytes;
+    }
+
+    /**
+     * POST /airlines
+     * Validates hash before processing.
+     */
+    public String createAirline(RawHttpRequest request) throws IOException {
+        // 1. Validate hash and get body
+        byte[] bodyBytes = validateAndGetBody(request);
+        String jsonBody = new String(bodyBytes, StandardCharsets.UTF_8);
+
+        // Deserializes directly to the JPA entity
         JpaAirline newAirline = gson.fromJson(jsonBody, JpaAirline.class);
-        // --- FI CORRECCIÓ ---
 
         if (newAirline == null) {
             throw new BadRequestException("Invalid JSON format for Airline.");
         }
 
-        // Assegura que l'ID sigui 0 per a una nova inserció
+        // Ensure ID is 0 for a new insertion
         newAirline.setAirlineId(0);
 
-        repository.save(newAirline); // Ara passem el tipus correcte (JpaAirline)
+        repository.save(newAirline); // Pass the correct type (JpaAirline)
 
         return gson.toJson(newAirline);
     }
 
-    /** PUT /airlines/{id} */
+    /**
+     * PUT /airlines/{id}
+     * Validates hash before processing.
+     */
     public String updateAirline(String id, RawHttpRequest request) throws IOException {
         int airlineId;
         try {
@@ -75,32 +111,29 @@ public class AirlineController {
             throw new BadRequestException("Invalid ID format. Must be an integer.");
         }
 
-        // Recuperem l'entitat existent (hauria de ser una instància de JpaAirline si el repo és JPA)
+        // Retrieve the existing entity
         Airline existingAirline = repository.get(airlineId);
         if (existingAirline == null) {
             throw new NotFoundException("Airline with ID " + airlineId + " not found.");
         }
-        // Assegurem que treballem amb l'objecte JPA
+        // Ensure we are working with the JPA object
         if (!(existingAirline instanceof JpaAirline)) {
-            throw new RuntimeException("Repository did not return a JpaAirline instance for update."); // Error intern
+            throw new RuntimeException("Repository did not return a JpaAirline instance for update."); // Internal error
         }
         JpaAirline existingJpaAirline = (JpaAirline) existingAirline;
 
+        // 1. Validate hash and get body
+        byte[] bodyBytes = validateAndGetBody(request);
+        String jsonBody = new String(bodyBytes, StandardCharsets.UTF_8);
 
-        String jsonBody = request.getBody()
-                .orElseThrow(() -> new BadRequestException("Request body is missing."))
-                .decodeBodyToString(StandardCharsets.UTF_8);
-
-        // --- CORRECCIÓ ---
-        // Deserialitza la informació actualitzada a l'entitat JPA
+        // Deserializes the updated info into the JPA entity
         JpaAirline updatedInfo = gson.fromJson(jsonBody, JpaAirline.class);
-        // --- FI CORRECCIÓ ---
 
         if (updatedInfo == null) {
             throw new BadRequestException("Invalid JSON format for Airline.");
         }
 
-        // Actualitza l'objecte entitat existent
+        // Update the existing entity object
         existingJpaAirline.setAirlineName(updatedInfo.getAirlineName());
         existingJpaAirline.setIataCode(updatedInfo.getIataCode());
         existingJpaAirline.setIcaoCode(updatedInfo.getIcaoCode());
@@ -108,7 +141,7 @@ public class AirlineController {
         existingJpaAirline.setFoundationYear(updatedInfo.getFoundationYear());
         existingJpaAirline.setWebsite(updatedInfo.getWebsite());
 
-        repository.save(existingJpaAirline); // Passa l'entitat JpaAirline actualitzada
+        repository.save(existingJpaAirline); // Pass the updated JpaAirline entity
         return gson.toJson(existingJpaAirline);
     }
 
@@ -127,6 +160,6 @@ public class AirlineController {
         }
 
         repository.delete(airline);
-        // No cal retornar res (el router enviarà un 204 No Content)
+        // No return needed (router will send 204 No Content)
     }
 }
