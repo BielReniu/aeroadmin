@@ -11,7 +11,6 @@ public class JdbcPilot {
     private String nationality;
     private JdbcAirline airline;
 
-    // Getters i Setters
     public int getPilotId() {
         return pilotId;
     }

@@ -13,7 +13,6 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
 
     private final DataSource dataSource;
 
-    // AQUEST ÉS EL CONSTRUCTOR CORREGIT
     public JdbcAircraftDetailRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -28,8 +27,6 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
     }
 
     private void insert(AircraftDetail detail) {
-        // Aquesta implementació assumeix que l'ID es gestiona a la taula AIRCRAFT
-        // i ja existeix quan es desa el detall.
         String sql = "INSERT INTO aircraft_detail (aircraft_id, passenger_capacity, max_range_km, max_speed_kmh, fuel_capacity_liters) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -116,13 +113,11 @@ class JdbcAircraftDetailRepository implements AircraftDetailRepository {
 
     @Override
     public Set<AircraftDetail> getByPassengerCapacity(int minCapacity, int maxCapacity) {
-        // Aquest mètode està pendent d'implementar
         return Set.of();
     }
 
     @Override
     public AircraftDetail create() {
-        // Aquest mètode està pendent d'implementar
         return new AircraftDetailImpl();
     }
 }

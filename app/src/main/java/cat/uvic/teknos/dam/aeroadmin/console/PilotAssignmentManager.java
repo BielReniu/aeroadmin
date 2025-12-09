@@ -69,7 +69,6 @@ public class PilotAssignmentManager {
         try {
             PilotAssignment newAssignment = assignmentRepository.create();
 
-            // 1. Seleccionar un vol
             System.out.println("\n--- Vols Disponibles ---");
             var flights = new ArrayList<>(flightRepository.getAll());
             flights.forEach(f -> System.out.printf("  ID: %d | Número: %s | Ruta: %s -> %s%n",
@@ -83,7 +82,6 @@ public class PilotAssignmentManager {
             }
             newAssignment.setFlight(selectedFlight);
 
-            // 2. Seleccionar un pilot
             System.out.println("\n--- Pilots Disponibles ---");
             var pilots = new ArrayList<>(pilotRepository.getAll());
             pilots.forEach(p -> System.out.printf("  ID: %d | Nom: %s %s%n",
@@ -97,7 +95,6 @@ public class PilotAssignmentManager {
             }
             newAssignment.setPilot(selectedPilot);
 
-            // 3. Seleccionar un rol
             System.out.println("\n--- Rols Disponibles ---");
             Arrays.stream(AssignmentRole.values()).forEach(role -> System.out.println(" - " + role.name()));
             System.out.print("Introdueix el rol (p. ex., CAPTAIN): ");

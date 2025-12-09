@@ -24,7 +24,6 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
         this.dataSource = dataSource;
     }
 
-    // ... els mètodes save, insert, update, delete, get, getAll i getByFlight ja estaven correctes ...
     @Override
     public void save(PilotAssignment assignment) {
         if (assignment.getAssignmentId() == 0) {
@@ -84,11 +83,11 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
 
     private static final String QUERY_BASE = "SELECT pa.*, " +
             "f.flight_number, f.departure_airport, f.arrival_airport, f.scheduled_departure, " +
-            "p.first_name, p.last_name, pl.license_number " + // Canviat p.license_number per pl.license_number
+            "p.first_name, p.last_name, pl.license_number " +
             "FROM pilot_assignment pa " +
             "LEFT JOIN flight f ON pa.flight_id = f.flight_id " +
             "LEFT JOIN pilot p ON pa.pilot_id = p.pilot_id " +
-            "LEFT JOIN pilot_license pl ON p.pilot_id = pl.pilot_id "; // Afegit JOIN a pilot_license
+            "LEFT JOIN pilot_license pl ON p.pilot_id = pl.pilot_id ";
 
     @Override
     public PilotAssignment get(Integer id) {
@@ -152,7 +151,6 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
         assignment.setLeadPilot(rs.getBoolean("lead_pilot"));
         assignment.setAssignedHours(rs.getBigDecimal("assigned_hours"));
 
-        // Mapejar Flight des del JOIN
         int flightId = rs.getInt("flight_id");
         if (!rs.wasNull()) {
             Flight flight = new FlightImpl();
@@ -161,7 +159,6 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
             flight.setDepartureAirport(rs.getString("departure_airport"));
             flight.setArrivalAirport(rs.getString("arrival_airport"));
 
-            // CORRECCIÓ: Comprovem si el timestamp és null
             Timestamp departureTimestamp = rs.getTimestamp("scheduled_departure");
             if (departureTimestamp != null) {
                 flight.setScheduledDeparture(departureTimestamp.toLocalDateTime());
@@ -170,7 +167,6 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
             assignment.setFlight(flight);
         }
 
-        // Mapejar Pilot des del JOIN
         int pilotId = rs.getInt("pilot_id");
         if (!rs.wasNull()) {
             Pilot pilot = new PilotImpl();
@@ -178,12 +174,10 @@ public class JdbcPilotAssignmentRepository implements PilotAssignmentRepository 
             pilot.setFirstName(rs.getString("first_name"));
             pilot.setLastName(rs.getString("last_name"));
 
-            // CORRECCIÓ: Creem i assignem la llicència al pilot
             String licenseNumber = rs.getString("license_number");
             if (licenseNumber != null) {
                 PilotLicense license = new PilotLicenseImpl();
                 license.setLicenseNumber(licenseNumber);
-                // Aquí podríem omplir més dades de la llicència si les tinguéssim al JOIN
                 pilot.setLicense(license);
             }
 

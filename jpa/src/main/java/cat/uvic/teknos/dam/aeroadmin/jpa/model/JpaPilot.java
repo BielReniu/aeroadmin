@@ -12,7 +12,7 @@ public class JpaPilot implements Pilot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pilot_id") // Bona pràctica: especificar el nom de la columna
+    @Column(name = "pilot_id")
     private int pilotId;
 
     @Column(name = "first_name")
@@ -27,14 +27,13 @@ public class JpaPilot implements Pilot {
     private String nationality;
 
     @OneToOne(targetEntity = JpaPilotLicense.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "pilot_id") // Normalment, la llicència comparteix el PK del pilot
+    @JoinColumn(name = "pilot_id")
     private PilotLicense license;
 
     @ManyToOne(targetEntity = JpaAirline.class)
     @JoinColumn(name = "airline_id")
     private Airline airline;
 
-    // Getters i Setters de la interfície Pilot (i només aquests)
 
     @Override
     public int getPilotId() {
@@ -53,7 +52,6 @@ public class JpaPilot implements Pilot {
 
     @Override
     public void setAirline(Airline airline) {
-        // Cal fer el cast a la implementació concreta de JPA
         this.airline = (JpaAirline) airline;
     }
 
@@ -104,7 +102,6 @@ public class JpaPilot implements Pilot {
 
     @Override
     public void setLicense(PilotLicense license) {
-        // Cal fer el cast a la implementació concreta de JPA
         this.license = (JpaPilotLicense) license;
     }
 }

@@ -1,12 +1,18 @@
 package cat.uvic.teknos.dam.aeroadmin.server;
 
+import cat.uvic.teknos.dam.aeroadmin.server.controllers.SecurityController;
+import cat.uvic.teknos.dam.aeroadmin.utilities.security.CryptoUtils;
+import cat.uvic.teknos.dam.aeroadmin.utilities.security.EncryptionUtils;
 import rawhttp.core.RawHttp;
+import rawhttp.core.RawHttpHeaders;
 import rawhttp.core.RawHttpRequest;
 import rawhttp.core.RawHttpResponse;
+import rawhttp.core.body.StringBody;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.Socket;
-// AFEGIT: Import per al comptador
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientHandler implements Runnable {
@@ -14,11 +20,10 @@ public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final RequestRouter router;
     private final RawHttp rawHttp = new RawHttp();
-
-    // AFEGIT: Camp per al comptador
     private final AtomicInteger connectedClients;
 
-    // MODIFICAT: El constructor ara rep el comptador
+    private SecretKey sessionKey;
+
     public ClientHandler(Socket clientSocket, RequestRouter router, AtomicInteger connectedClients) {
         this.clientSocket = clientSocket;
         this.router = router;
@@ -27,49 +32,97 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        // AFEGIT: Incrementa el comptador quan el fil comença
         connectedClients.incrementAndGet();
-
-        // MODIFICAT: Canviem 'try-with-resources' per 'try-finally'
-        // per mantenir el socket obert.
         try {
-            // AFEGIT: Bucle per mantenir la connexió oberta
             while (true) {
-                // 1. Llegim la petició HTTP del client (es bloqueja aquí fins a rebre dades)
                 RawHttpRequest request = rawHttp.parseRequest(clientSocket.getInputStream());
 
-                // AFEGIT: Gestió de la desconnexió (Req 3)
                 if (request.getUri().getPath().equals("/disconnect")) {
                     System.out.println("Client " + clientSocket.getInetAddress() + " ha sol·licitat desconnexió.");
-
-                    // Enviar Acknowledgement (ACK)
                     RawHttpResponse<?> ack = rawHttp.parseResponse("HTTP/1.1 200 OK\r\nServer: AeroAdmin-ACK\r\nConnection: close\r\n\r\n");
                     ack.writeTo(clientSocket.getOutputStream());
-
-                    break; // Sortir del bucle 'while' per tancar la connexió
+                    break;
                 }
 
-                // 2. Passem la petició al router perquè la processi i ens retorni una resposta
+                if (request.getMethod().equals("GET") && request.getUri().getPath().startsWith("/keys/")) {
+                    String clientId = request.getUri().getPath().substring("/keys/".length());
+                    System.out.println("🔒 Iniciant handshake segur amb el client: " + clientId);
+
+                    try {
+                        SecurityController.HandshakeResult result = router.getSecurityController().generateKeyForClient(clientId);
+                        this.sessionKey = result.serverKey;
+
+                        String jsonResponse = "{\"key\": \"" + result.encryptedClientKey + "\"}";
+
+                        RawHttpResponse<?> response = rawHttp.parseResponse("HTTP/1.1 200 OK\r\n" +
+                                        "Content-Type: application/json\r\n" +
+                                        "Content-Length: " + jsonResponse.length() + "\r\n\r\n")
+                                .withBody(new StringBody(jsonResponse));
+
+                        response.writeTo(clientSocket.getOutputStream());
+                        continue;
+
+                    } catch (Exception e) {
+                        System.err.println("❌ Error en el handshake: " + e.getMessage());
+                        RawHttpResponse<?> errorRes = rawHttp.parseResponse("HTTP/1.1 403 Forbidden\r\n\r\n");
+                        errorRes.writeTo(clientSocket.getOutputStream());
+                        break;
+                    }
+                }
+
+                if (sessionKey != null && request.getBody().isPresent()) {
+                    try {
+                        String encryptedBody = request.getBody().get().decodeBodyToString(StandardCharsets.UTF_8);
+                        String decryptedBody = EncryptionUtils.decryptAES(encryptedBody, sessionKey);
+                        String newHash = CryptoUtils.hash(decryptedBody);
+
+                        RawHttpHeaders newHeaders = RawHttpHeaders.newBuilder()
+                                .merge(request.getHeaders())
+                                .overwrite("X-Message-Hash", newHash)
+                                .build();
+
+                        request = request.withBody(new StringBody(decryptedBody))
+                                .withHeaders(newHeaders);
+
+                    } catch (Exception e) {
+                        System.err.println("❌ Error desencriptant petició: " + e.getMessage());
+                        break;
+                    }
+                }
+
                 RawHttpResponse<?> response = router.route(request);
 
-                // 3. Enviem la resposta HTTP al client
-                response.writeTo(clientSocket.getOutputStream());
+                if (sessionKey != null && response.getBody().isPresent()) {
+                    try {
+                        String plainBody = response.getBody().get().decodeBodyToString(StandardCharsets.UTF_8);
+                        String encryptedBody = EncryptionUtils.encryptAES(plainBody, sessionKey);
 
-                // NO tanquem el socket, tornem a l'inici del bucle
+                        byte[] encryptedBytes = encryptedBody.getBytes(StandardCharsets.UTF_8);
+
+                        RawHttpHeaders headers = RawHttpHeaders.newBuilder()
+                                .merge(response.getHeaders())
+                                .overwrite("Content-Length", String.valueOf(encryptedBytes.length))
+                                .build();
+
+                        response = response.withBody(new StringBody(encryptedBody))
+                                .withHeaders(headers);
+
+                    } catch (Exception e) {
+                        System.err.println("❌ Error encriptant resposta: " + e.getMessage());
+                    }
+                }
+
+                response.writeTo(clientSocket.getOutputStream());
             }
 
         } catch (IOException e) {
-            // Això saltarà si el client es desconnecta de cop (p.ex. tanca la consola o hi ha un error)
-            System.err.println("Client desconnectat (possiblement per inactivitat o error): " + clientSocket.getInetAddress());
+            System.err.println("Client desconnectat: " + clientSocket.getInetAddress());
         } finally {
-            // AFEGIT: En qualsevol cas (sortida normal o error), decrementem el comptador i tanquem el socket.
             connectedClients.decrementAndGet();
             try {
-                if (!clientSocket.isClosed()) {
-                    clientSocket.close();
-                }
+                if (!clientSocket.isClosed()) clientSocket.close();
             } catch (IOException e) {
-                System.err.println("Error en tancar el socket: " + e.getMessage());
+                System.err.println("Error tancant socket: " + e.getMessage());
             }
         }
     }

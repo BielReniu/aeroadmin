@@ -27,7 +27,7 @@ public class JpaPilotAssignmentRepository implements PilotAssignmentRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            em.merge(assignment); // Simplificat: gestiona la creació i l'actualització
+            em.merge(assignment);
             tx.commit();
         }
     }
@@ -38,7 +38,6 @@ public class JpaPilotAssignmentRepository implements PilotAssignmentRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            // Cal un cast per accedir a l'ID de la implementació de JPA
             int id = ((JpaPilotAssignment) assignment).getAssignmentId();
             PilotAssignment toDelete = em.find(JpaPilotAssignment.class, id);
 
@@ -68,7 +67,6 @@ public class JpaPilotAssignmentRepository implements PilotAssignmentRepository {
     public Set<PilotAssignment> getByFlight(Flight flight) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             TypedQuery<JpaPilotAssignment> query = em.createQuery(
-                    // JPQL permet comparar directament per l'entitat relacionada
                     "SELECT a FROM JpaPilotAssignment a WHERE a.flight = :flight",
                     JpaPilotAssignment.class
             );

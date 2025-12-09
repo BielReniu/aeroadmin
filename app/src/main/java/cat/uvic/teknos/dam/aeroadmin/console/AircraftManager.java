@@ -57,7 +57,6 @@ public class AircraftManager {
     }
 
     private void printAircraft(Aircraft a) {
-        // Mètode d'ajuda per imprimir un avió de manera consistent
         String airlineName = (a.getAirline() != null) ? a.getAirline().getAirlineName() : "N/A";
         System.out.printf("ID: %d | Model: %s | Fabricant: %s | Matrícula: %s | Aerolínia: %s%n",
                 a.getAircraftId(), a.getModel(), a.getManufacturer(), a.getRegistrationNumber(), airlineName);
@@ -120,20 +119,17 @@ public class AircraftManager {
             System.out.print("Any de producció: ");
             newAircraft.setProductionYear(Integer.parseInt(scanner.nextLine()));
 
-            // Llistar companyies disponibles
             System.out.println("\n--- Companyies Aèries disponibles ---");
             Set<Airline> airlineSet = airlineRepository.getAll();
             if (airlineSet.isEmpty()) {
                 System.out.println("❌ No hi ha aerolínies registrades. No es pot assignar l'avió. Abortant operació.");
                 return;
             }
-            // Convertim a ArrayList per poder ordenar per ID si volguéssim
             var airlines = new ArrayList<>(airlineSet);
             airlines.forEach(al ->
                     System.out.printf("  ID: %d | Nom: %s | IATA: %s%n",
                             al.getAirlineId(), al.getAirlineName(), al.getIataCode()));
 
-            // Demanar i validar l'ID de la companyia
             System.out.print("Introdueix l'ID de la Companyia Aèria: ");
             int airlineId = Integer.parseInt(scanner.nextLine().trim());
 
@@ -144,7 +140,6 @@ public class AircraftManager {
             }
             newAircraft.setAirline(airline);
 
-            // Guardar l'avió
             repository.save(newAircraft);
             System.out.println("✅ Avió guardat correctament.");
 

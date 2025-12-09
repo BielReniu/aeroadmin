@@ -36,7 +36,6 @@ public class JpaFlight implements Flight {
     @JoinColumn(name = "aircraft_id")
     private JpaAircraft aircraft;
 
-    // Getters y setters
 
     @Override
     public int getFlightId() {

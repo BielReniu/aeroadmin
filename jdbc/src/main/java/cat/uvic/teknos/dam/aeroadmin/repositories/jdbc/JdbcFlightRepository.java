@@ -18,7 +18,6 @@ public class JdbcFlightRepository implements FlightRepository {
 
     private final DataSource dataSource;
 
-    // 1. CONSTRUCTOR CORREGIT
     public JdbcFlightRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -88,10 +87,9 @@ public class JdbcFlightRepository implements FlightRepository {
         }
     }
 
-    // 2. Base de la consulta optimitzada amb JOINs
     private static final String QUERY_BASE = "SELECT f.*, " +
-            "al.airline_name, al.iata_code, al.icao_code, " + // Camps de Airline
-            "ac.model, ac.manufacturer, ac.registration_number " + // Camps de Aircraft
+            "al.airline_name, al.iata_code, al.icao_code, " +
+            "ac.model, ac.manufacturer, ac.registration_number " +
             "FROM flight f " +
             "LEFT JOIN airline al ON f.airline_id = al.airline_id " +
             "LEFT JOIN aircraft ac ON f.aircraft_id = ac.aircraft_id ";
@@ -128,7 +126,6 @@ public class JdbcFlightRepository implements FlightRepository {
         return flights;
     }
 
-    // 3. MÈTODE IMPLEMENTAT
     @Override
     public Set<Flight> getByDepartureAirport(String departureAirport) {
         Set<Flight> flights = new HashSet<>();
@@ -147,7 +144,6 @@ public class JdbcFlightRepository implements FlightRepository {
         return flights;
     }
 
-    // 3. MÈTODE IMPLEMENTAT
     @Override
     public Flight create() {
         return new FlightImpl();
@@ -163,7 +159,6 @@ public class JdbcFlightRepository implements FlightRepository {
         flight.setScheduledArrival(rs.getTimestamp("scheduled_arrival").toLocalDateTime());
         flight.setStatus(FlightStatus.valueOf(rs.getString("status")));
 
-        // Mapejar Airline des del JOIN
         int airlineId = rs.getInt("airline_id");
         if (!rs.wasNull()) {
             Airline airline = new AirlineImpl();
@@ -174,7 +169,6 @@ public class JdbcFlightRepository implements FlightRepository {
             flight.setAirline(airline);
         }
 
-        // Mapejar Aircraft des del JOIN
         int aircraftId = rs.getInt("aircraft_id");
         if (!rs.wasNull()) {
             Aircraft aircraft = new AircraftImpl();

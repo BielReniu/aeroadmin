@@ -15,7 +15,7 @@ public class PilotAssignmentImpl implements PilotAssignment {
     private AssignmentRole role;
     private boolean isLeadPilot;
     private BigDecimal assignedHours;
-    private LocalDateTime assignedAt; // Camp afegit
+    private LocalDateTime assignedAt;
 
     @Override
     public int getAssignmentId() {

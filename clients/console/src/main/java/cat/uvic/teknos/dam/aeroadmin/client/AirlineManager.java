@@ -13,10 +13,8 @@ import java.util.Set;
  */
 public class AirlineManager {
     private final Scanner sc;
-    // MODIFICAT: Canvia el tipus de client
     private final PersistentAirlineApiClient apiClient;
 
-    // MODIFICAT: Rep el nou tipus de client via constructor
     public AirlineManager(Scanner sc, PersistentAirlineApiClient apiClient) {
         this.sc = sc;
         this.apiClient = apiClient;
@@ -46,17 +44,12 @@ public class AirlineManager {
                     default:  System.out.println("Opció invàlida.");
                 }
             } catch (IOException e) {
-                // Captura els errors de connexió o errors 4xx/5xx del servidor
                 System.err.println("❌ Error de comunicació amb el servidor: " + e.getMessage());
-                // Si l'error és perquè el socket s'ha tancat (p.ex. per inactivitat),
-                // la lògica de reconnexió a PersistentAirlineApiClient s'activarà
-                // a la següent petició.
             } catch (NumberFormatException e) {
                 System.err.println("❌ Error: L'ID o l'any han de ser números.");
             } catch (Exception e) {
-                // Qualsevol altre error
                 System.err.println("❌ Ha ocorregut un error inesperat: " + e.getMessage());
-                e.printStackTrace(); // Útil per debugar
+                e.printStackTrace();
             }
         }
     }
@@ -106,7 +99,7 @@ public class AirlineManager {
         System.out.print("Any de fundació (opcional)" + (airlineToUpdate != null ? " (anterior: '" + (airlineToUpdate.getFoundationYear() != null ? airlineToUpdate.getFoundationYear() : "") + "')" : "") + ": ");
         String yearInput = sc.nextLine();
         if (!yearInput.isBlank()) {
-            airline.setFoundationYear(Integer.parseInt(yearInput)); // Pot llançar NumberFormatException
+            airline.setFoundationYear(Integer.parseInt(yearInput));
         }
 
         System.out.print("Pàgina web (opcional)" + (airlineToUpdate != null ? " (anterior: '" + airlineToUpdate.getWebsite() + "')" : "") + ": ");
@@ -127,12 +120,11 @@ public class AirlineManager {
         System.out.print("Introdueix l'ID de la companyia a actualitzar: ");
         int id = Integer.parseInt(sc.nextLine());
 
-        // Primer, la demanem per mostrar les dades anteriors
         Airline existingAirline = apiClient.getAirlineById(id);
         System.out.println("Introdueix les noves dades per a l'ID " + id + ":");
 
         Airline updatedAirlineData = readAirlineDataFromUser(existingAirline);
-        updatedAirlineData.setAirlineId(id); // Assegurem que l'ID és el correcte
+        updatedAirlineData.setAirlineId(id);
 
         Airline result = apiClient.updateAirline(updatedAirlineData);
         System.out.println("✅ Companyia actualitzada correctament.");

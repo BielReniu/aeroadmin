@@ -1,6 +1,5 @@
 package cat.uvic.teknos.dam.aeroadmin.repositories.jdbc.model;
 
-// Aquesta classe representa l'entitat 'Aircraft'
 public class JdbcAircraft {
 
     private int aircraftId;
@@ -8,9 +7,8 @@ public class JdbcAircraft {
     private String manufacturer;
     private String registrationNumber;
     private int productionYear;
-    private JdbcAirline airline; // Utilitzem la teva classe JdbcAirline
+    private JdbcAirline airline;
 
-    // Getters i Setters per a cada propietat
 
     public int getAircraftId() {
         return aircraftId;

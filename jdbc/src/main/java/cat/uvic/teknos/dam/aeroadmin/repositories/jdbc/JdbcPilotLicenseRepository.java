@@ -14,19 +14,16 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
 
     private final DataSource dataSource;
 
-    // 1. CONSTRUCTOR CORREGIT
     public JdbcPilotLicenseRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    // 2. MÈTODE SAVE AMB LÒGICA CORREGIDA (UPSERT)
     @Override
     public void save(PilotLicense license) {
         if (license.getPilotId() <= 0) {
             throw new IllegalArgumentException("Pilot ID must be valid to save a license.");
         }
 
-        // Intentem actualitzar primer. Si no afecta cap fila, vol dir que no existeix, i l'inserim.
         if (update(license) == 0) {
             insert(license);
         }
@@ -108,7 +105,6 @@ public class JdbcPilotLicenseRepository implements PilotLicenseRepository {
         return licenses;
     }
 
-    // 3. MÈTODES IMPLEMENTATS
     @Override
     public Set<PilotLicense> getByLicenseType(LicenseType licenseType) {
         Set<PilotLicense> licenses = new HashSet<>();

@@ -26,7 +26,7 @@ public class JpaPilotRepository implements PilotRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            em.merge(pilot); // Simplificat: gestiona la creació i l'actualització
+            em.merge(pilot);
             tx.commit();
         }
     }
@@ -37,7 +37,6 @@ public class JpaPilotRepository implements PilotRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            // Cal un cast per accedir a l'ID de la implementació de JPA
             int id = ((JpaPilot) pilot).getPilotId();
             Pilot toDelete = em.find(JpaPilot.class, id);
 
@@ -67,7 +66,6 @@ public class JpaPilotRepository implements PilotRepository {
     public Set<Pilot> getByAirline(Airline airline) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             TypedQuery<JpaPilot> query = em.createQuery(
-                    // JPQL permet filtrar per l'entitat relacionada directament
                     "SELECT p FROM JpaPilot p WHERE p.airline = :airline",
                     JpaPilot.class
             );

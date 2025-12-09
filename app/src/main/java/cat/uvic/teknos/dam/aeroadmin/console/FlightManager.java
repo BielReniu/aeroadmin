@@ -88,7 +88,6 @@ public class FlightManager {
             System.out.print("Data i hora d'arribada (yyyy-MM-dd HH:mm): ");
             newFlight.setScheduledArrival(LocalDateTime.parse(sc.nextLine(), formatter));
 
-            // Llistar i seleccionar Aerolínia
             System.out.println("\n--- Aerolínies Disponibles ---");
             var airlines = new ArrayList<>(airlineRepository.getAll());
             airlines.forEach(a -> System.out.printf("  ID: %d | Nom: %s%n", a.getAirlineId(), a.getAirlineName()));
@@ -101,7 +100,6 @@ public class FlightManager {
             }
             newFlight.setAirline(selectedAirline);
 
-            // Llistar i seleccionar Avió
             System.out.println("\n--- Avions Disponibles ---");
             var aircrafts = new ArrayList<>(aircraftRepository.getAll());
             aircrafts.forEach(a -> System.out.printf("  ID: %d | Model: %s | Matrícula: %s%n", a.getAircraftId(), a.getModel(), a.getRegistrationNumber()));
@@ -114,7 +112,7 @@ public class FlightManager {
             }
             newFlight.setAircraft(selectedAircraft);
 
-            newFlight.setStatus(FlightStatus.SCHEDULED); // Per defecte, un vol nou està programat
+            newFlight.setStatus(FlightStatus.SCHEDULED);
 
             flightRepository.save(newFlight);
             System.out.println("✅ Vol creat correctament.");

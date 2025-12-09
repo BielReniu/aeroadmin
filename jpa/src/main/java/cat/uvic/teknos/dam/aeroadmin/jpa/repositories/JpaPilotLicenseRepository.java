@@ -26,7 +26,7 @@ public class JpaPilotLicenseRepository implements PilotLicenseRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            em.merge(license); // Simplificat: gestiona la creació o actualització (upsert)
+            em.merge(license);
             tx.commit();
         }
     }
@@ -37,7 +37,6 @@ public class JpaPilotLicenseRepository implements PilotLicenseRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            // Cal un cast per accedir a l'ID de la implementació de JPA
             int id = ((JpaPilotLicense) license).getPilotId();
             PilotLicense toDelete = em.find(JpaPilotLicense.class, id);
 

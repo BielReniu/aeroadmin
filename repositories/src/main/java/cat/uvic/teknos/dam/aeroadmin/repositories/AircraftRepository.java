@@ -5,7 +5,6 @@ import java.util.Set;
 
 public interface AircraftRepository extends Repository<Integer, Aircraft> {
 
-    // Mètodes específics per a Aircraft
     Set<Aircraft> getByManufacturer(String manufacturer);
 
     Aircraft create();

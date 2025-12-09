@@ -8,7 +8,6 @@ public class JdbcAircraftDetail {
     private int maxSpeedKmh;
     private int fuelCapacityLiters;
 
-    // Getters i Setters
     public int getAircraftId() {
         return aircraftId;
     }

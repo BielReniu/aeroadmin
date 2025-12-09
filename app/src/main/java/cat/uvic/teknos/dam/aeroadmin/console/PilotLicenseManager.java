@@ -38,7 +38,7 @@ public class PilotLicenseManager {
 
             switch (choice) {
                 case "1": listAll(); break;
-                case "2": save();    break; // Unificat Crear i Actualitzar
+                case "2": save();    break;
                 case "3": delete();  break;
                 case "0": exit = true; break;
                 default:  System.out.println("Opció invàlida.");
@@ -66,7 +66,6 @@ public class PilotLicenseManager {
     private void save() {
         System.out.println("\n--- Crear o Actualitzar Llicència ---");
         try {
-            // 1. Seleccionar un pilot
             System.out.println("\n--- Pilots Disponibles ---");
             var pilots = new ArrayList<>(pilotRepository.getAll());
             if (pilots.isEmpty()) {
@@ -77,7 +76,6 @@ public class PilotLicenseManager {
             System.out.print("Introdueix l'ID del pilot per a la llicència: ");
             int pilotId = Integer.parseInt(sc.nextLine());
 
-            // Comprovem si el pilot existeix
             if (pilotRepository.get(pilotId) == null) {
                 System.out.println("❌ Pilot no trobat. Operació cancel·lada.");
                 return;
@@ -95,7 +93,6 @@ public class PilotLicenseManager {
             System.out.print("Número de llicència: ");
             license.setLicenseNumber(sc.nextLine());
 
-            // 3. Seleccionar un tipus de llicència
             System.out.println("\n--- Tipus de Llicència Disponibles ---");
             Arrays.stream(LicenseType.values()).forEach(type -> System.out.println(" - " + type.name()));
             System.out.print("Introdueix el tipus (p. ex., ATPL): ");

@@ -15,7 +15,6 @@ public class JdbcPilotRepository implements PilotRepository {
 
     private final DataSource dataSource;
 
-    // 1. CONSTRUCTOR CORREGIT
     public JdbcPilotRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -87,7 +86,6 @@ public class JdbcPilotRepository implements PilotRepository {
         }
     }
 
-    // 2. Base de la consulta optimitzada amb JOIN
     private static final String QUERY_BASE = "SELECT p.*, al.airline_name, al.iata_code, al.icao_code " +
             "FROM pilot p " +
             "LEFT JOIN airline al ON p.airline_id = al.airline_id ";
@@ -124,7 +122,6 @@ public class JdbcPilotRepository implements PilotRepository {
         return pilots;
     }
 
-    // 3. MÈTODE IMPLEMENTAT
     @Override
     public Set<Pilot> getByAirline(Airline airline) {
         Set<Pilot> pilots = new HashSet<>();
@@ -156,7 +153,6 @@ public class JdbcPilotRepository implements PilotRepository {
         pilot.setDateOfBirth(rs.getDate("date_of_birth").toLocalDate());
         pilot.setNationality(rs.getString("nationality"));
 
-        // Mapejar Airline des del JOIN
         int airlineId = rs.getInt("airline_id");
         if (!rs.wasNull()) {
             Airline airline = new AirlineImpl();

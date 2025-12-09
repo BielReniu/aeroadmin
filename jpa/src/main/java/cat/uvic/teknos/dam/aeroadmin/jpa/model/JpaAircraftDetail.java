@@ -15,7 +15,6 @@ public class JpaAircraftDetail implements AircraftDetail {
     private int maxSpeedKmh;
     private int fuelCapacityLiters;
 
-    // Getters y setters
 
     @Override
     public int getAircraftId() {

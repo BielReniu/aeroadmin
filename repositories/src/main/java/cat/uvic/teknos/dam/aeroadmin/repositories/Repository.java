@@ -1,4 +1,4 @@
-package cat.uvic.teknos.dam.aeroadmin.repositories;  // <--- Canvia el paquet aquí
+package cat.uvic.teknos.dam.aeroadmin.repositories;
 
 import java.util.Set;
 

@@ -28,7 +28,6 @@ public class JpaAirline implements Airline {
 
     private String website;
 
-    // Getters i Setters que implementen la interfície Airline
 
     @Override
     public int getAirlineId() {

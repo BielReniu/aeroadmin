@@ -15,7 +15,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
 
     private final DataSource dataSource;
 
-    // 1. CONSTRUCTOR CORREGIT
     public JdbcAircraftRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -38,7 +37,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
             stmt.setString(3, aircraft.getRegistrationNumber());
             stmt.setInt(4, aircraft.getProductionYear());
 
-            // Comprova que l'aerolínia no sigui nul·la abans de desar
             if (aircraft.getAirline() != null) {
                 stmt.setInt(5, aircraft.getAirline().getAirlineId());
             } else {
@@ -91,7 +89,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
 
     @Override
     public Aircraft get(Integer id) {
-        // 2. CONSULTA OPTIMITZADA AMB JOIN
         String sql = "SELECT a.*, al.airline_name, al.iata_code, al.icao_code FROM aircraft a " +
                 "LEFT JOIN airline al ON a.airline_id = al.airline_id WHERE a.aircraft_id = ?";
         try (Connection conn = dataSource.getConnection();
@@ -111,7 +108,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
     @Override
     public Set<Aircraft> getAll() {
         Set<Aircraft> aircrafts = new HashSet<>();
-        // 2. CONSULTA OPTIMITZADA AMB JOIN
         String sql = "SELECT a.*, al.airline_name, al.iata_code, al.icao_code FROM aircraft a " +
                 "LEFT JOIN airline al ON a.airline_id = al.airline_id";
         try (Connection conn = dataSource.getConnection();
@@ -126,7 +122,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
         return aircrafts;
     }
 
-    // 3. MÈTODE getByManufacturer IMPLEMENTAT
     @Override
     public Set<Aircraft> getByManufacturer(String manufacturer) {
         Set<Aircraft> aircrafts = new HashSet<>();
@@ -146,7 +141,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
         return aircrafts;
     }
 
-    // 3. MÈTODE create IMPLEMENTAT
     @Override
     public Aircraft create() {
         return new AircraftImpl();
@@ -161,7 +155,6 @@ public class JdbcAircraftRepository implements AircraftRepository {
         aircraft.setProductionYear(rs.getInt("production_year"));
 
         int airlineId = rs.getInt("airline_id");
-        // Comprovem si l'airline_id és null a la base de dades
         if (!rs.wasNull()) {
             Airline airline = new AirlineImpl();
             airline.setAirlineId(airlineId);

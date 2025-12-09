@@ -18,7 +18,6 @@ public class JpaAircraft implements Aircraft {
     private String registrationNumber;
     private int productionYear;
 
-    // Getters i setters
 
     @Override
     public int getAircraftId() { return aircraftId; }

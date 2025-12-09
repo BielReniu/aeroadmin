@@ -24,7 +24,6 @@ public interface PilotAssignment {
     BigDecimal getAssignedHours();
     void setAssignedHours(BigDecimal assignedHours);
 
-    // Propietat completada amb el seu getter i setter
     LocalDateTime getAssignedAt();
     void setAssignedAt(LocalDateTime assignedAt);
 }

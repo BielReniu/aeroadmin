@@ -18,7 +18,6 @@ public class CryptoUtils {
     private static final byte[] SALT;
     private static final String PROPERTIES_FILE = "/crypto.properties";
 
-    // Static initializer to load configuration once.
     static {
         try (InputStream input = CryptoUtils.class.getResourceAsStream(PROPERTIES_FILE)) {
             if (input == null) {
@@ -73,19 +72,14 @@ public class CryptoUtils {
         try {
             MessageDigest md = MessageDigest.getInstance(ALGORITHM);
 
-            // 1. Apply salt
             md.update(SALT);
 
-            // 2. Apply input data
             md.update(bytes);
 
-            // 3. Calculate digest
             byte[] digest = md.digest();
 
-            // 4. Convert to Hexadecimal
             return bytesToHex(digest);
         } catch (NoSuchAlgorithmException e) {
-            // This should not happen if the algorithm in crypto.properties is valid (e.g., SHA-256)
             throw new RuntimeException("Configured hash algorithm is invalid: " + ALGORITHM, e);
         }
     }

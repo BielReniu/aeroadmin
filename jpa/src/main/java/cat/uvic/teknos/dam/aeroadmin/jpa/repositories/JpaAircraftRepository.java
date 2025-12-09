@@ -25,7 +25,7 @@ public class JpaAircraftRepository implements AircraftRepository {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
-            em.merge(aircraft); // Simplificat: s'encarrega de crear o actualitzar
+            em.merge(aircraft);
             tx.commit();
         }
     }
@@ -36,7 +36,6 @@ public class JpaAircraftRepository implements AircraftRepository {
             EntityTransaction tx = em.getTransaction();
             tx.begin();
 
-            // Cal un cast per accedir a l'ID de la implementació de JPA
             int id = ((JpaAircraft) aircraft).getAircraftId();
             Aircraft toDelete = em.find(JpaAircraft.class, id);
 

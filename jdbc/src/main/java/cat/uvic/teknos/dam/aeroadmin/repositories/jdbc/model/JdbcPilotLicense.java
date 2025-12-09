@@ -11,7 +11,6 @@ public class JdbcPilotLicense {
     private LocalDate issueDate;
     private LocalDate expirationDate;
 
-    // Getters i Setters
     public int getPilotId() {
         return pilotId;
     }

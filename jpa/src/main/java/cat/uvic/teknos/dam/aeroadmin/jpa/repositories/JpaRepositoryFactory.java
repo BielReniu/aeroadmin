@@ -6,7 +6,6 @@ import jakarta.persistence.Persistence;
 
 public class JpaRepositoryFactory implements RepositoryFactory {
 
-    // ⚠️ Recorda comprovar que "aerodmin" és el nom correcte de la teva persistence-unit a persistence.xml
     private static final EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("aerodmin");
 

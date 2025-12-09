@@ -4,7 +4,7 @@ import cat.uvic.teknos.dam.aeroadmin.model.model.Airline;
 
 public class AirlineImpl implements Airline {
     private int airlineId;
-    private String airlineName; // Canviat de "name" a "airlineName"
+    private String airlineName;
     private String iataCode;
     private String icaoCode;
     private String country;
@@ -82,5 +82,4 @@ public class AirlineImpl implements Airline {
         this.website = website;
     }
 
-    // El mètode setCode s'ha eliminat
 }

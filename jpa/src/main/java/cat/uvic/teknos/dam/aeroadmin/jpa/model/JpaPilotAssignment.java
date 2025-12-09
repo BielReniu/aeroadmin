@@ -28,9 +28,8 @@ public class JpaPilotAssignment implements PilotAssignment {
     @Column(name = "assigned_at")
     private LocalDateTime assignedAt;
 
-    private String role; // e.g., "Captain", "First Officer"
+    private String role;
 
-    // Getters y setters
 
     public int getAssignmentId() {
         return assignmentId;

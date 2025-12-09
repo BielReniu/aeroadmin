@@ -20,7 +20,6 @@ public class JpaPilotLicense implements PilotLicense {
     private LocalDate issueDate;
     private LocalDate expirationDate;
 
-    // Getters y setters
 
     @Override
     public int getPilotId() {

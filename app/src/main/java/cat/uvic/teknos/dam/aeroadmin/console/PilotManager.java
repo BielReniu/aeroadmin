@@ -79,7 +79,6 @@ public class PilotManager {
             System.out.print("Nacionalitat: ");
             newPilot.setNationality(sc.nextLine());
 
-            // Llistar i seleccionar Aerolínia
             System.out.println("\n--- Aerolínies Disponibles ---");
             var airlines = new ArrayList<>(airlineRepository.getAll());
             if (airlines.isEmpty()) {
@@ -128,7 +127,6 @@ public class PilotManager {
                     pilot.setLastName(newLastName);
                 }
 
-                // Aquí podries afegir la resta de camps per actualitzar...
 
                 pilotRepository.save(pilot);
                 System.out.println("✅ Pilot actualitzat correctament.");

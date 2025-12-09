@@ -12,7 +12,6 @@ public class JdbcPilotAssignment {
     private boolean leadPilot;
     private BigDecimal assignedHours;
 
-    // Getters i Setters
     public int getAssignmentId() {
         return assignmentId;
     }

@@ -110,7 +110,6 @@ public class AirlineManager {
                     airline.setIataCode(newIata);
                 }
 
-                // Aquí podries afegir la resta de camps per actualitzar...
 
                 repo.save(airline);
                 System.out.println("✅ Companyia actualitzada correctament.");

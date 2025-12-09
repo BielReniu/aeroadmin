@@ -15,7 +15,6 @@ public class JdbcFlight {
     private JdbcAircraft aircraft;
     private JdbcAirline airline;
 
-    // Getters i Setters
     public int getFlightId() {
         return flightId;
     }

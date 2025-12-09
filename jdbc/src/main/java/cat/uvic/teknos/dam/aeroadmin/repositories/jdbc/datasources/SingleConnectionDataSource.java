@@ -5,14 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-// Important: Aquesta classe implementa la teva interfície DataSource
 public class SingleConnectionDataSource implements DataSource {
 
     private final Connection connection;
 
     public SingleConnectionDataSource(Properties properties) {
         try {
-            // Agafa les propietats (URL, USER, PASSWORD) i crea la connexió
             this.connection = DriverManager.getConnection(
                     properties.getProperty("URL"),
                     properties.getProperty("USER"),

@@ -9,11 +9,9 @@ import java.util.Scanner;
 
 public class App {
 
-    // ... (la part de dalt del fitxer és igual)
 
     public static void main(String[] args) {
         try {
-            // ... (la part de càrrega de propietats i selecció de JDBC/JPA és igual)
 
             Properties props = new Properties();
             try (InputStream in = App.class.getResourceAsStream("/di.properties")) {

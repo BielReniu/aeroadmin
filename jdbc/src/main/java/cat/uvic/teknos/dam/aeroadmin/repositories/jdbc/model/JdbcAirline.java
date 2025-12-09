@@ -10,7 +10,6 @@ public class JdbcAirline {
     private Integer foundationYear;
     private String website;
 
-    // Getters i Setters
     public int getAirlineId() {
         return airlineId;
     }

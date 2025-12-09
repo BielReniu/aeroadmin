@@ -2,11 +2,10 @@ package cat.uvic.teknos.dam.aeroadmin.server.exceptions;
 
 public class HttpException extends RuntimeException {
   private final int statusCode;
-  private final String statusMessage; // <-- NOU CAMP
+  private final String statusMessage;
 
-  // Constructor modificat per acceptar el statusMessage
   public HttpException(int statusCode, String statusMessage, String detailMessage) {
-    super(detailMessage); // El missatge detallat va al RuntimeException
+    super(detailMessage);
     this.statusCode = statusCode;
     this.statusMessage = statusMessage;
   }
@@ -15,7 +14,7 @@ public class HttpException extends RuntimeException {
     return statusCode;
   }
 
-  public String getStatusMessage() { // <-- NOU GETTER
+  public String getStatusMessage() {
     return statusMessage;
   }
 }
