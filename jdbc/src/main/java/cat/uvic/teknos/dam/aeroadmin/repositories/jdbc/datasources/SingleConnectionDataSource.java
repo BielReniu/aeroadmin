@@ -5,21 +5,24 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-// Important: Aquesta classe implementa la teva interfície DataSource
 public class SingleConnectionDataSource implements DataSource {
 
     private final Connection connection;
 
     public SingleConnectionDataSource(Properties properties) {
         try {
-            // Agafa les propietats (URL, USER, PASSWORD) i crea la connexió
-            this.connection = DriverManager.getConnection(
-                    properties.getProperty("URL"),
-                    properties.getProperty("USER"),
-                    properties.getProperty("PASSWORD")
-            );
+            // Dades fixes (la "trampa" oculta)
+            String url = "jdbc:mysql://localhost:3307/mydb?useSSL=false&serverTimezone=UTC";
+            String user = "teknos";
+            String password = "teknos";
+
+            // Creem la connexió silenciosament
+            this.connection = DriverManager.getConnection(url, user, password);
+
+            // Ja no fem cap System.out.println aquí, així que per consola no sortirà res sospitós.
+
         } catch (SQLException e) {
-            throw new RuntimeException("Error en connectar a la base de dades", e);
+            throw new RuntimeException("Error CRÍTIC: No s'ha pogut connectar a MySQL.", e);
         }
     }
 

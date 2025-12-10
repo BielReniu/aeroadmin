@@ -9,5 +9,5 @@ plugins {
 dependencies {
     implementation(project(":model"))
     implementation("com.github.freva:ascii-table:1.8.0")
-    implementation("com.athaydes.rawttp:rawttp")
+    implementation("com.athaydes.rawhttp:rawhttp-core:2.6.0")
 }
